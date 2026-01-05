@@ -1,0 +1,6 @@
+Use case:
+To keep track of watched movies, movies one wants to watch in the future and
+a personal rating system for watched movies.
+
+The target user:
+People who enjoy movies and want to keep track of their movie backlog.
