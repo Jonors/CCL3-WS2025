@@ -1,7 +1,7 @@
 CCL Project - Paul Hitzl & Jona Zeichen
 
 Project name:
-WATCH ME
+MoviLog
 
 Project Description:
 A mobile app built with Kotlin in Android Studio. Allowing users to log movies they have or want to watch and rate them.
