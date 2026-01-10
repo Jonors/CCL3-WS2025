@@ -1,10 +1,19 @@
- #The Docker image that will be used to build your app
-image: alpine:lts
-create-pages:
-  pages:
-    # The folder that contains the files to be exposed at the Page URL
-    publish: pages
-  rules:
-    # This ensures that only pushes to the default branch will trigger
-    # a pages deploy
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+# Use a lightweight image for deployment
+image: alpine:latest
+
+pages:
+  stage: deploy
+  script:
+    # Remove any existing public folder to avoid conflicts
+    - rm -rf public
+    # Create a new public folder
+    - mkdir public
+    # Copy all content from your 'pages' directory into 'public'
+    - cp -r pages/* public/
+  artifacts:
+    paths:
+      # Tell GitLab to serve the content from the 'public' folder
+      - public
+  only:
+    # This will trigger only when you push to the main branch
+    - main
