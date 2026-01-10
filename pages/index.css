@@ -58,9 +58,6 @@ header h1 {
     transition: 0.3s;
 }
 
-.nav-bar a:hover {
-    color: var(--accent);
-}
 
 .nav-bar a.active {
     background-color: var(--accent);
