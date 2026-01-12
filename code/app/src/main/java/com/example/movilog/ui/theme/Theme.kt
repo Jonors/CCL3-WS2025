@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.Typography
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -52,7 +53,7 @@ fun MoviLogTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        /*typography = Typography,*/
         content = content
     )
 }
