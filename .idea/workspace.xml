@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f5a311d9-67a2-4f71-b41c-73a062bcd915" name="Changes" comment="set up android project" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Joni" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Jonors&quot;
+  }
+}</component>
+  <component name="GitLabMergeRequestFiltersHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPENED&quot;,
+    &quot;assignee&quot;: {
+      &quot;type&quot;: &quot;org.jetbrains.plugins.gitlab.mergerequest.ui.filters.GitLabMergeRequestsFiltersValue.MergeRequestsMemberFilterValue.MergeRequestsAssigneeFilterValue&quot;,
+      &quot;username&quot;: &quot;cc241032&quot;,
+      &quot;fullname&quot;: &quot;Zeichen Jona&quot;
+    }
+  }
+}</component>
+  <component name="GitLabMergeRequestsSettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;first&quot;: &quot;https://git.nwt.fhstp.ac.at/cclws25/CCL3-WS2025.git&quot;,
+    &quot;second&quot;: &quot;3d197d2f-f42f-4342-a514-5de4b2b58a9d&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Jonors/CCL3-WS2025.git&quot;,
+    &quot;accountId&quot;: &quot;fda4ee52-a864-48c7-873c-2d45047ca750&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="37sveIYSoJDKQ9g46Ek37HADoSL" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/jonazeichen/StudioProjects/CCL3-WS2025",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/pages/images" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/pages/images" />
+    </key>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f5a311d9-67a2-4f71-b41c-73a062bcd915" name="Changes" comment="" />
+      <created>1767704687058</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1767704687058</updated>
+    </task>
+    <task id="LOCAL-00001" summary="initial commit, setting up pages and code directory">
+      <option name="closed" value="true" />
+      <created>1767704834864</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1767704834864</updated>
+    </task>
+    <task id="LOCAL-00002" summary="initial commit, setting up pages and code directory">
+      <option name="closed" value="true" />
+      <created>1767704891426</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1767704891426</updated>
+    </task>
+    <task id="LOCAL-00003" summary="initial commit, setting up pages and code directory">
+      <option name="closed" value="true" />
+      <created>1767709861560</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1767709861560</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Set up github pages">
+      <option name="closed" value="true" />
+      <created>1768036893883</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1768036893883</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Set up github pages">
+      <option name="closed" value="true" />
+      <created>1768036917963</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1768036917963</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Set up github pages">
+      <option name="closed" value="true" />
+      <created>1768037515354</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1768037515354</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Set up github pages">
+      <option name="closed" value="true" />
+      <created>1768064441706</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1768064441706</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Set up github pages">
+      <option name="closed" value="true" />
+      <created>1768065169003</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1768065169003</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Set up github pages">
+      <option name="closed" value="true" />
+      <created>1768065463116</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1768065463116</updated>
+    </task>
+    <task id="LOCAL-00010" summary="set up android project">
+      <option name="closed" value="true" />
+      <created>1768212241911</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1768212241911</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="initial commit, setting up pages and code directory" />
+    <MESSAGE value="Set up github pages" />
+    <MESSAGE value="set up android project" />
+    <option name="LAST_COMMIT_MESSAGE" value="set up android project" />
+  </component>
+</project>
