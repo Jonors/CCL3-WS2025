@@ -1,5 +1,6 @@
 package com.example.movilog.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movilog.data.MovieRepository
@@ -11,24 +12,59 @@ import kotlinx.coroutines.launch
 
 class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
-    // This is the "Truth" of what the screen should show
-    private val _uiState = MutableStateFlow<List<Movie>>(emptyList())
-    val uiState: StateFlow<List<Movie>> = _uiState.asStateFlow()
+    // ✅ Hier dein TMDB v4 Read Access Token rein:
+    private val token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YzgzOGIwYmI1ZjJmMjhhZDRmYTM3NzIwMjZjNWZkOSIsIm5iZiI6MTc2NzYyOTQ1OS43NjYsInN1YiI6IjY5NWJlMjkzZWM4NmQyZDY4ZjE3YmI0NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.j0chOgmWycwc9o23qJFXuzrkIoPyfVGZLPNra0-i6Us"
+
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query.asStateFlow()
+
+    private val _popularMovies = MutableStateFlow<List<Movie>>(emptyList())
+    val popularMovies: StateFlow<List<Movie>> = _popularMovies.asStateFlow()
+
+    private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
+    val searchResults: StateFlow<List<Movie>> = _searchResults.asStateFlow()
 
     init {
         fetchPopularMovies()
     }
 
-    private fun fetchPopularMovies() {
+    fun fetchPopularMovies() {
         viewModelScope.launch {
             try {
-                // Replace "YOUR_API_KEY" with your actual TMDB Key
-                val token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YzgzOGIwYmI1ZjJmMjhhZDRmYTM3NzIwMjZjNWZkOSIsIm5iZiI6MTc2NzYyOTQ1OS43NjYsInN1YiI6IjY5NWJlMjkzZWM4NmQyZDY4ZjE3YmI0NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.j0chOgmWycwc9o23qJFXuzrkIoPyfVGZLPNra0-i6Us"
-                val response = repository.fetchNewMovies(token)
-                val movies = repository.fetchNewMovies(token)
-                _uiState.value = movies?.results ?: emptyList()
+                val response = repository.fetchPopularMovies(token)
+                _popularMovies.value = response.results
+                Log.d("TMDB", "Popular loaded: ${response.results.size}")
             } catch (e: Exception) {
-                // In a real app, you'd handle errors here (like showing a Toast)
+                _popularMovies.value = emptyList()
+                Log.e("TMDB", "Failed to load popular movies", e)
+            }
+        }
+    }
+
+    fun onQueryChange(newValue: String) {
+        _query.value = newValue
+
+        val trimmed = newValue.trim()
+        if (trimmed.isEmpty()) {
+            _searchResults.value = emptyList()
+            return
+        }
+
+        // optional: erst ab 2 Zeichen suchen
+        if (trimmed.length >= 2) {
+            searchMovies(trimmed)
+        }
+    }
+
+    private fun searchMovies(q: String) {
+        viewModelScope.launch {
+            try {
+                val response = repository.searchMovies(token, q)
+                _searchResults.value = response.results
+                Log.d("TMDB", "Search '$q': ${response.results.size}")
+            } catch (e: Exception) {
+                _searchResults.value = emptyList()
+                Log.e("TMDB", "Failed to search movies", e)
             }
         }
     }

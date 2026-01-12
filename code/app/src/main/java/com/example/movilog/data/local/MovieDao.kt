@@ -11,7 +11,7 @@ interface MovieDao {
 
     // Get all movies we saved
     @Query("SELECT * FROM movies")
-    fun getAllMovies(): List<Movie>
+    fun getAllMovies(): kotlinx.coroutines.flow.Flow<List<Movie>>
 
     // Change the rating of a movie
     @Update

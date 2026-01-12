@@ -10,8 +10,11 @@ data class Movie(
     @PrimaryKey val id: Int,
     val title: String,
     val overview: String,
-    @SerializedName("poster_path") val posterPath: String?, // TMDB uses snake_case
-    @SerializedName("release_date") val releaseDate: String?,
-    var userRating: Float = 0f,
-    var isWatched: Boolean = false
+    @SerializedName("poster_path")
+    val posterPath: String?,
+    val releaseDate: String?,
+    var inWatchlist: Boolean = false,
+    var isWatched: Boolean = false,
+    var userRating: Float? = null,        // Pflicht sobald watched
+    var watchedAt: Long? = null           // Pflicht sobald watched (epoch millis)
 )
