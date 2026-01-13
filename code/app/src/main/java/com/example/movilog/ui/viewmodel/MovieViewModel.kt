@@ -143,25 +143,36 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
     private val _detailState = MutableStateFlow(MovieDetailUiState())
     val detailState: StateFlow<MovieDetailUiState> = _detailState.asStateFlow()
 
+    private var detailDbJob: kotlinx.coroutines.Job? = null
+
     fun loadMovieDetails(movieId: Int) {
+        // 1) DB observer starten (und alten stoppen)
+        detailDbJob?.cancel()
+        detailDbJob = viewModelScope.launch {
+            repository.observeMovieById(movieId).collect { entity ->
+                _detailState.value = _detailState.value.copy(
+                    inWatchlist = entity?.inWatchlist ?: false,
+                    isWatched = entity?.isWatched ?: false,
+                    userRating = entity?.userRating
+                )
+            }
+        }
+
+        // 2) TMDB Details laden (Film-Infos)
         viewModelScope.launch {
-            _detailState.value = MovieDetailUiState(isLoading = true)
+            _detailState.value = _detailState.value.copy(isLoading = true)
             try {
                 val details = repository.fetchMovieDetails(token, movieId)
-
-                // TODO: später aus Room lesen (User-Status pro Movie)
-                _detailState.value = MovieDetailUiState(
+                _detailState.value = _detailState.value.copy(
                     isLoading = false,
-                    details = details,
-                    inWatchlist = false,
-                    isWatched = false,
-                    userRating = null
+                    details = details
                 )
             } catch (e: Exception) {
-                _detailState.value = MovieDetailUiState(isLoading = false, details = null)
+                _detailState.value = _detailState.value.copy(isLoading = false, details = null)
             }
         }
     }
+
 
     fun addMovieToWatchlist(movieId: Int) {
         val d = _detailState.value.details ?: return
@@ -246,6 +257,5 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
     fun deleteMovie(movieId: Int) {
         viewModelScope.launch { repository.delete(movieId) }
     }
-
 
 }

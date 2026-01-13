@@ -39,4 +39,8 @@ interface MovieDao {
 
     @Query("SELECT * FROM movies WHERE id = :movieId LIMIT 1")
     suspend fun getMovieById(movieId: Int): Movie?
+
+    @Query("SELECT * FROM movies WHERE id = :movieId LIMIT 1")
+    fun observeMovieById(movieId: Int): kotlinx.coroutines.flow.Flow<Movie?>
+
 }

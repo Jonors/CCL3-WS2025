@@ -30,5 +30,8 @@ class MovieRepository(
 
     suspend fun fetchUpcomingMovies(token: String) =
         apiService.getUpcomingMovies(token)
+
+    fun observeMovieById(movieId: Int) = movieDao.observeMovieById(movieId)
+
 }
 

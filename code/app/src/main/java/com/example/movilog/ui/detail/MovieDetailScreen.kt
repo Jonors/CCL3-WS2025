@@ -1,6 +1,7 @@
 package com.example.movilog.ui.detail
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,8 +17,6 @@ import coil.compose.AsyncImage
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.RatingsCard
-import com.example.movilog.ui.detail.MarkWatchedDialog
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,15 +25,14 @@ fun MovieDetailScreen(
     viewModel: MovieViewModel,
     onBack: () -> Unit = {}
 ) {
-    // Load once
     LaunchedEffect(movieId) { viewModel.loadMovieDetails(movieId) }
 
     val state by viewModel.detailState.collectAsState()
     var showWatchedDialog by remember { mutableStateOf(false) }
 
-
-    val bg = Color(0xFF0B2A36) // dark blue-ish like mock
+    val bg = Color(0xFF0B2A36)
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
+    val accent = Color(0xFFF2B400)
 
     Scaffold(
         containerColor = bg,
@@ -43,11 +41,7 @@ fun MovieDetailScreen(
                 title = { Text("Movie Screen", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -57,93 +51,156 @@ fun MovieDetailScreen(
                 )
             )
         }
-
     ) { padding ->
         when {
             state.isLoading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
                 }
             }
+
             state.details == null -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text("Failed to load movie details", color = Color.White)
                 }
             }
+
             else -> {
                 val d = state.details!!
 
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
+                        .padding(padding),
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    // --- Hero card (backdrop + poster + title block + chips) ---
-                    HeroCard(
-                        details = d,
-                        cardBg = cardBg,
-                        isWatched = state.isWatched
-                    )
-
-                    Spacer(Modifier.height(10.dp))
-
-                    // --- Buttons row ---
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedButton(
-                            onClick = { viewModel.addCurrentDetailToWatchlist()},
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                        ) { Text("Add to Watchlist") }
-
-
-                        Button(
-                            onClick = { showWatchedDialog = true },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFF2B400),
-                                contentColor = Color.Black
-                            )
-                        ) { Text("Watched") }
-
-                    }
-
-                    Spacer(Modifier.height(14.dp))
-
-                    // --- Overview ---
-                    Text(
-                        text = d.overview.ifBlank { "No description available." },
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-
-                    Spacer(Modifier.height(18.dp))
-
-                    // --- Ratings card (graph + user rating) ---
-                    RatingsCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        cardBg = cardBg,
-                        userRating = state.userRating ?: d.voteAverage ?: 0f
-                    )
-
-                    if (showWatchedDialog) {
-                        MarkWatchedDialog(
-                            onDismiss = { showWatchedDialog = false },
-                            onConfirm = { rating, watchedAt ->
-                                showWatchedDialog = false
-                                viewModel.markCurrentDetailAsWatched(rating, watchedAt)
-                            }
+                    item {
+                        HeroCard(
+                            details = d,
+                            cardBg = cardBg,
+                            isWatched = state.isWatched
                         )
+                        Spacer(Modifier.height(10.dp))
                     }
 
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            when {
+                                // ✅ 1) Already watched -> only show "Watched" badge/button
+                                state.isWatched -> {
+                                    Button(
+                                        onClick = {},
+                                        enabled = false,
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = accent,
+                                            disabledContainerColor = accent,
+                                            disabledContentColor = Color.Black
+                                        )
+                                    ) {
+                                        Text("Watched")
+                                    }
+                                }
+
+                                // ✅ 2) In watchlist -> show disabled "In Watchlist" + Watched button
+                                state.inWatchlist -> {
+                                    OutlinedButton(
+                                        onClick = {},
+                                        enabled = false,
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = Color.White,
+                                            disabledContentColor = Color.White
+                                        )
+                                    ) {
+                                        Text("In Watchlist")
+                                    }
+
+                                    Button(
+                                        onClick = { showWatchedDialog = true },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = accent,
+                                            contentColor = Color.Black
+                                        )
+                                    ) {
+                                        Text("Watched")
+                                    }
+                                }
+
+                                // ✅ 3) Normal -> show both buttons
+                                else -> {
+                                    OutlinedButton(
+                                        onClick = { viewModel.addCurrentDetailToWatchlist() },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                                    ) {
+                                        Text("Add to Watchlist")
+                                    }
+
+                                    Button(
+                                        onClick = { showWatchedDialog = true },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = accent,
+                                            contentColor = Color.Black
+                                        )
+                                    ) {
+                                        Text("Watched")
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(Modifier.height(14.dp))
+                    }
+
+                    item {
+                        Text(
+                            text = d.overview.ifBlank { "No description available." },
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(Modifier.height(18.dp))
+                    }
+
+                    item {
+                        RatingsCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            cardBg = cardBg,
+                            userRating = state.userRating ?: d.voteAverage ?: 0f
+                        )
+                        Spacer(Modifier.height(24.dp))
+                    }
+                }
+
+                // Dialog overlay
+                if (showWatchedDialog) {
+                    MarkWatchedDialog(
+                        onDismiss = { showWatchedDialog = false },
+                        onConfirm = { rating, watchedAt ->
+                            showWatchedDialog = false
+                            viewModel.markCurrentDetailAsWatched(rating, watchedAt)
+                        }
+                    )
                 }
             }
         }
@@ -167,7 +224,6 @@ private fun HeroCard(
         colors = CardDefaults.cardColors(containerColor = cardBg)
     ) {
         Column {
-            // Backdrop
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -180,7 +236,6 @@ private fun HeroCard(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Poster overlay
                 if (posterUrl != null) {
                     Card(
                         modifier = Modifier
@@ -199,7 +254,6 @@ private fun HeroCard(
                 }
             }
 
-            // Title + “credits placeholders”
             Column(Modifier.padding(16.dp)) {
                 Text(
                     text = details.title,
@@ -211,8 +265,6 @@ private fun HeroCard(
 
                 Spacer(Modifier.height(6.dp))
 
-                // Placeholders like in mock (Director / Studios etc.)
-                // (Wenn du später Credits willst: /movie/{id}/credits endpoint)
                 Text(
                     text = "Directed by …",
                     color = Color.White.copy(alpha = 0.75f),
@@ -226,7 +278,6 @@ private fun HeroCard(
 
                 Spacer(Modifier.height(12.dp))
 
-                // Chips row (runtime, release date, watched)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     InfoChip(label = formatRuntime(details.runtime))
                     InfoChip(label = details.releaseDate ?: "Unknown date")
