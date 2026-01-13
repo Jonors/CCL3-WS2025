@@ -16,5 +16,6 @@ data class Movie(
     var inWatchlist: Boolean = false,
     var isWatched: Boolean = false,
     var userRating: Float? = null,        // Pflicht sobald watched
-    var watchedAt: Long? = null           // Pflicht sobald watched (epoch millis)
-)
+    var watchedAt: Long? = null,
+    var runtimeMinutes: Int? = null
+    )

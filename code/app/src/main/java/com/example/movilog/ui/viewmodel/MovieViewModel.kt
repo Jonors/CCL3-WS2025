@@ -6,10 +6,23 @@ import androidx.lifecycle.viewModelScope
 import com.example.movilog.data.model.Movie
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.data.repository.MovieRepository
+import com.example.movilog.ui.stats.StatsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneId
+import java.time.format.TextStyle
+import java.util.Locale
+
+
+
 
 class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
@@ -101,9 +114,6 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
     }
 
 
-
-
-
     fun onQueryChange(newValue: String) {
         _query.value = newValue
 
@@ -139,6 +149,45 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         val isWatched: Boolean = false,
         val userRating: Float? = null
     )
+
+    val statsState: StateFlow<StatsUiState> =
+        repository.watchedFlow()
+            .map { watched ->
+                val watchedOnly = watched.filter { it.isWatched && it.watchedAt != null }
+
+                val watchedCount = watchedOnly.size
+                val totalMinutes = watchedOnly.sumOf { it.runtimeMinutes ?: 0 }
+
+                val now = LocalDate.now()
+                val yearMonth = YearMonth.from(now)
+                val monthLabel =
+                    "${yearMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${yearMonth.year}"
+
+                val heatmap = buildMonthHeatmap(
+                    yearMonth,
+                    watchedOnly.mapNotNull { it.watchedAt }
+                )
+
+                val favorites = watchedOnly
+                    .filter { (it.userRating ?: 0f) > 0f }
+                    .sortedByDescending { it.userRating ?: 0f }
+                    .take(10)
+
+                val recent = watchedOnly
+                    .sortedByDescending { it.watchedAt ?: 0L }
+                    .take(10)
+
+                StatsUiState(
+                    watchedCount = watchedCount,
+                    totalMinutes = totalMinutes,
+                    monthLabel = monthLabel,
+                    heatmap = heatmap,
+                    favorites = favorites,
+                    recent = recent
+                )
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatsUiState())
+
 
     private val _detailState = MutableStateFlow(MovieDetailUiState())
     val detailState: StateFlow<MovieDetailUiState> = _detailState.asStateFlow()
@@ -220,7 +269,8 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             inWatchlist = true,
             isWatched = false,
             userRating = null,
-            watchedAt = null
+            watchedAt = null,
+            runtimeMinutes = d.runtime
         )
 
     fun addCurrentDetailToWatchlist() {
@@ -258,4 +308,30 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         viewModelScope.launch { repository.delete(movieId) }
     }
 
+
+    private fun buildMonthHeatmap(yearMonth: YearMonth, watchedAtMillis: List<Long>): List<Int> {
+        val zone = ZoneId.systemDefault()
+
+        val counts = IntArray(yearMonth.lengthOfMonth() + 1)
+        watchedAtMillis.forEach { ms ->
+            val date = Instant.ofEpochMilli(ms).atZone(zone).toLocalDate()
+            if (date.year == yearMonth.year && date.month == yearMonth.month) {
+                counts[date.dayOfMonth] += 1
+            }
+        }
+
+        val firstDay = yearMonth.atDay(1)
+        val firstDowIndex = (firstDay.dayOfWeek.value - 1) // Mon=0
+        val totalCells = firstDowIndex + yearMonth.lengthOfMonth()
+        val weeks = ((totalCells + 6) / 7).coerceAtLeast(5)
+
+        val grid = MutableList(weeks * 7) { 0 }
+        for (day in 1..yearMonth.lengthOfMonth()) {
+            val cellIndex = firstDowIndex + (day - 1)
+            grid[cellIndex] = counts[day]
+        }
+        return grid
+    }
+
 }
+

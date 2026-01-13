@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
 import com.example.movilog.ui.MovieViewModel
+import com.example.movilog.ui.stats.StatsScreen
 
 
 @Composable
@@ -113,8 +114,10 @@ fun AppNavHost(viewModel: MovieViewModel) {
             }
 
             composable(Routes.STATS) {
-                // erstmal placeholder – bauen wir danach richtig
-                StatsPlaceholderScreen()
+                StatsScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { id -> navController.navigate("${Routes.MOVIE_DETAIL}/$id") }
+                )
             }
 
             composable(
