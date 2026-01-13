@@ -1,10 +1,11 @@
-package com.example.movilog.ui
+package com.example.movilog.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movilog.data.MovieRepository
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.remote.MovieDetailsDto
+import com.example.movilog.data.repository.MovieRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,10 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults: StateFlow<List<Movie>> = _searchResults.asStateFlow()
+
+    val watchlist = repository.watchlistFlow()
+    val watchedList = repository.watchedFlow()
+
 
     init {
         fetchPopularMovies()
@@ -71,7 +76,7 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
     data class MovieDetailUiState(
         val isLoading: Boolean = true,
-        val details: com.example.movilog.data.remote.MovieDetailsDto? = null,
+        val details: MovieDetailsDto? = null,
         val inWatchlist: Boolean = false,
         val isWatched: Boolean = false,
         val userRating: Float? = null
@@ -99,5 +104,90 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             }
         }
     }
+
+    fun addMovieToWatchlist(movieId: Int) {
+        val d = _detailState.value.details ?: return
+        viewModelScope.launch {
+            // ✅ ensures row exists
+            repository.upsert(detailsToEntity(d).copy(inWatchlist = true))
+            // optional: falls du UPDATE behalten willst, aber nicht nötig
+            // repository.addToWatchlist(movieId)
+
+            _detailState.value = _detailState.value.copy(inWatchlist = true)
+        }
+    }
+
+    fun markMovieAsWatched(movieId: Int, rating: Float, watchedAt: Long) {
+        val d = _detailState.value.details ?: return
+        viewModelScope.launch {
+            // ✅ ensures row exists + stores watched fields
+            repository.upsert(
+                detailsToEntity(d).copy(
+                    inWatchlist = false,
+                    isWatched = true,
+                    userRating = rating,
+                    watchedAt = watchedAt
+                )
+            )
+            // optional: falls du UPDATE behalten willst, aber nicht nötig
+            // repository.markWatched(movieId, rating, watchedAt)
+
+            _detailState.value = _detailState.value.copy(
+                isWatched = true,
+                inWatchlist = false,
+                userRating = rating
+            )
+        }
+    }
+
+
+    private fun detailsToEntity(d: MovieDetailsDto) =
+        Movie(
+            id = d.id,
+            title = d.title,
+            overview = d.overview,
+            posterPath = d.posterPath,
+            releaseDate = d.releaseDate,
+            inWatchlist = true,
+            isWatched = false,
+            userRating = null,
+            watchedAt = null
+        )
+
+    fun addCurrentDetailToWatchlist() {
+        val d = _detailState.value.details ?: return
+        viewModelScope.launch {
+            repository.upsert(detailsToEntity(d))   // wichtig: row exists
+            repository.addToWatchlist(d.id)
+            _detailState.value = _detailState.value.copy(inWatchlist = true)
+        }
+    }
+
+    fun markCurrentDetailAsWatched(rating: Float, watchedAt: Long) {
+        val d = _detailState.value.details ?: return
+        viewModelScope.launch {
+            // ensure movie exists in DB
+            repository.upsert(
+                detailsToEntity(d).copy(
+                    inWatchlist = false,
+                    isWatched = true,
+                    userRating = rating,
+                    watchedAt = watchedAt
+                )
+            )
+            repository.markAsWatched(d.id, rating, watchedAt)
+
+            _detailState.value = _detailState.value.copy(
+                isWatched = true,
+                inWatchlist = false,
+                userRating = rating
+            )
+        }
+    }
+
+    fun deleteMovie(movieId: Int) {
+        viewModelScope.launch { repository.delete(movieId) }
+    }
+
 
 }

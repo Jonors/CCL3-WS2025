@@ -4,12 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
-import com.example.movilog.data.MovieRepository
+import com.example.movilog.data.repository.MovieRepository
 import com.example.movilog.data.local.AppDatabase
 import com.example.movilog.data.remote.TmdbApiService
 import com.example.movilog.navigation.AppNavHost
-import com.example.movilog.ui.BrowseScreen
-import com.example.movilog.ui.MovieViewModel
+import com.example.movilog.ui.viewmodel.MovieViewModel
 import com.example.movilog.ui.MovieViewModelFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -34,8 +33,7 @@ class MainActivity : ComponentActivity() {
         val viewModel = ViewModelProvider(this, viewModelFactory)[MovieViewModel::class.java]
 
         setContent {
-            AppNavHost(viewModel = viewModel)
-        }
+            AppNavHost(viewModel = viewModel)        }
 
     }
 }

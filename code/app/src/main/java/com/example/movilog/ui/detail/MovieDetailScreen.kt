@@ -1,6 +1,5 @@
-package com.example.movilog.ui
+package com.example.movilog.ui.detail
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,7 +14,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.remote.MovieDetailsDto
-import kotlin.math.roundToInt
+import com.example.movilog.ui.viewmodel.MovieViewModel
+import com.example.movilog.ui.RatingsCard
+import com.example.movilog.ui.detail.MarkWatchedDialog
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +30,8 @@ fun MovieDetailScreen(
     LaunchedEffect(movieId) { viewModel.loadMovieDetails(movieId) }
 
     val state by viewModel.detailState.collectAsState()
+    var showWatchedDialog by remember { mutableStateOf(false) }
+
 
     val bg = Color(0xFF0B2A36) // dark blue-ish like mock
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
@@ -92,26 +96,21 @@ fun MovieDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedButton(
-                            onClick = { /* TODO: add to watchlist */ },
+                            onClick = { viewModel.addCurrentDetailToWatchlist()},
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                        ) {
-                            Text("Add to Watchlist")
-                        }
+                        ) { Text("Add to Watchlist") }
+
 
                         Button(
-                            onClick = {
-                                // TODO: open dialog -> require rating + watched date
-                                // after confirm: save to DB + update state
-                            },
+                            onClick = { showWatchedDialog = true },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFFF2B400),
                                 contentColor = Color.Black
                             )
-                        ) {
-                            Text("Watched")
-                        }
+                        ) { Text("Watched") }
+
                     }
 
                     Spacer(Modifier.height(14.dp))
@@ -134,6 +133,17 @@ fun MovieDetailScreen(
                         cardBg = cardBg,
                         userRating = state.userRating ?: d.voteAverage ?: 0f
                     )
+
+                    if (showWatchedDialog) {
+                        MarkWatchedDialog(
+                            onDismiss = { showWatchedDialog = false },
+                            onConfirm = { rating, watchedAt ->
+                                showWatchedDialog = false
+                                viewModel.markCurrentDetailAsWatched(rating, watchedAt)
+                            }
+                        )
+                    }
+
                 }
             }
         }

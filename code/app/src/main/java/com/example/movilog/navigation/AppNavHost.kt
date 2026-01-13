@@ -1,42 +1,140 @@
 package com.example.movilog.navigation
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.movilog.ui.BrowseScreen
-import com.example.movilog.ui.MovieDetailScreen
-import com.example.movilog.ui.MovieViewModel
+import com.example.movilog.ui.detail.MovieDetailScreen
+import com.example.movilog.ui.watchlist.WatchlistScreen
+import com.example.movilog.ui.lists.MyListsScreen
+import com.example.movilog.ui.viewmodel.MovieViewModel
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
+
 
 @Composable
 fun AppNavHost(viewModel: MovieViewModel) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    NavHost(
-        navController = navController,
-        startDestination = Routes.BROWSE
-    ) {
-        composable(Routes.BROWSE) {
-            BrowseScreen(
-                viewModel = viewModel,
-                onMovieClick = { movie ->
-                    navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}")
+    // current route (für selected tab)
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            val bg = androidx.compose.ui.graphics.Color(0xFF0B2A36)
+            val selected = androidx.compose.ui.graphics.Color(0xFFF2B400)
+            val unselected = androidx.compose.ui.graphics.Color.White
+
+            NavigationBar(
+                containerColor = bg,
+                tonalElevation = 0.dp
+            ) {
+                bottomNavItems.forEach { item ->
+                    val isSelected = currentRoute == item.route
+
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                                Spacer(Modifier.height(4.dp))
+                            }
+                        }
+                        ,
+                        label = {
+                            Text(
+                                text = item.label,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = bg,               // ✅ removes the pill highlight
+                            selectedIconColor = selected,
+                            selectedTextColor = selected,
+                            unselectedIconColor = unselected,
+                            unselectedTextColor = unselected
+                        ),
+                        alwaysShowLabel = true               // ✅ label always visible like in screenshot
+                    )
                 }
-            )
+            }
         }
 
-        composable(
-            route = "${Routes.MOVIE_DETAIL}/{movieId}",
-            arguments = listOf(navArgument("movieId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val movieId = backStackEntry.arguments?.getInt("movieId") ?: return@composable
-            MovieDetailScreen(
-                movieId = movieId,
-                viewModel = viewModel,
-                onBack = { navController.popBackStack() }
-            )
+    ) { padding ->
+
+        NavHost(
+            navController = navController,
+            startDestination = Routes.BROWSE
+        ) {
+            composable(Routes.BROWSE) {
+                BrowseScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { movie ->
+                        navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}")
+                    }
+                )
+            }
+
+            composable(Routes.WATCHLIST) {
+                WatchlistScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { id ->
+                        navController.navigate("${Routes.MOVIE_DETAIL}/$id")
+                    }
+                )
+            }
+
+            composable(Routes.MY_LISTS) {
+                MyListsScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { id ->
+                        navController.navigate("${Routes.MOVIE_DETAIL}/$id")
+                    }
+                )
+            }
+
+            composable(Routes.STATS) {
+                // erstmal placeholder – bauen wir danach richtig
+                StatsPlaceholderScreen()
+            }
+
+            composable(
+                route = "${Routes.MOVIE_DETAIL}/{movieId}",
+                arguments = listOf(navArgument("movieId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val movieId = backStackEntry.arguments?.getInt("movieId") ?: return@composable
+                MovieDetailScreen(
+                    movieId = movieId,
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun StatsPlaceholderScreen() {
+    Surface {
+        Text("Stats coming soon…")
     }
 }
