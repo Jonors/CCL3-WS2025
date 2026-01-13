@@ -70,15 +70,17 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    val room_version = "2.6.1"
-    implementation(libs.androidx.room.ktx)
-    // ADD THIS LINE: It generates the "AppDatabase_Impl" file that was missing
-    ksp("androidx.room:room-compiler:$room_version")
+    // Navigation & UI
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation("io.coil-kt:coil-compose:2.4.0") // For loading images
 
-    // --- Retrofit & Networking ---
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    // Retrofit (Networking)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    // Room (Local SQLite Database)
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 }
