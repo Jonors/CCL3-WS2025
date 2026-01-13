@@ -21,6 +21,12 @@ interface TmdbApiService {
         @Header("accept") accept: String = "application/json"
     ): TmdbResponse
 
+    @GET("movie/upcoming")
+    suspend fun getUpcomingMovies(
+        @Header("Authorization") token: String,
+        @Header("accept") accept: String = "application/json"
+    ): TmdbResponse
+
     @GET("movie/{movie_id}")
     suspend fun getMovieDetails(
         @Header("Authorization") token: String,

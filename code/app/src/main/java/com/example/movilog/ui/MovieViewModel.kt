@@ -21,11 +21,16 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
     private val _popularMovies = MutableStateFlow<List<Movie>>(emptyList())
     val popularMovies: StateFlow<List<Movie>> = _popularMovies.asStateFlow()
 
+    private val _upcomingMovies = MutableStateFlow<List<Movie>>(emptyList())
+
+    val upcomingMovies: StateFlow<List<Movie>> = _upcomingMovies.asStateFlow()
+
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults: StateFlow<List<Movie>> = _searchResults.asStateFlow()
 
     init {
         fetchPopularMovies()
+        fetchUpcomingMovies()
     }
 
     fun fetchPopularMovies() {
@@ -40,6 +45,20 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             }
         }
     }
+
+    fun fetchUpcomingMovies() {
+        viewModelScope.launch {
+            try {
+                val response = repository.fetchUpcomingMovies(token)
+                _upcomingMovies.value = response.results
+                Log.d("TMDB", "Upcoming loaded: ${response.results.size}")
+            } catch (e: Exception) {
+                _upcomingMovies.value = emptyList()
+                Log.e("TMDB", "Failed to load upcoming movies", e)
+            }
+        }
+    }
+
 
     fun onQueryChange(newValue: String) {
         _query.value = newValue

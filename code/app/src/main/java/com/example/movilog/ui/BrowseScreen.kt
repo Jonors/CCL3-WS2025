@@ -2,9 +2,14 @@ package com.example.movilog.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -21,10 +26,12 @@ fun BrowseScreen(
 ) {
     val query by viewModel.query.collectAsState()
     val popular by viewModel.popularMovies.collectAsState()
+    val upcoming by viewModel.upcomingMovies.collectAsState()
     val search by viewModel.searchResults.collectAsState()
 
     val isSearching = query.trim().isNotEmpty()
-    val moviesToShow = if (isSearching) search else popular
+    val popularToShow = if (isSearching) search else popular
+    val upcomingToShow = if (isSearching) search else upcoming
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -46,27 +53,55 @@ fun BrowseScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        // ✅ Debug text: zeigt dir sofort ob Daten ankommen
-        Text(
-            text = "Movies loaded: ${moviesToShow.size}",
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-        )
+//        // ✅ Debug text: zeigt dir sofort ob Daten ankommen
+//        Text(
+//            text = "Movies loaded: ${moviesToShow.size}",
+//            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+//        )
 
         Text(
-            text = if (isSearching) "Search Results" else "Popular Movies",
+            text = if (isSearching) "Search Results" else "",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()) // Parent scroll
         ) {
-            items(moviesToShow) { movie ->
-                MovieCard(movie = movie, onClick = { onMovieClick(movie) })
+            // --- POPULAR SECTION ---
+            Text(
+                text = "Popular",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(popularToShow) { movie ->
+                    // Constraint the width so the card doesn't take the whole screen
+                    Box(modifier = Modifier.width(160.dp)) {
+                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
+                    }
+                }
+            }
+
+            Text(
+                text = "Upcoming movies count: ${upcomingToShow.size}",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(upcomingToShow) { movie ->
+                    Box(modifier = Modifier.width(160.dp)) {
+                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
+                    }
+                }
             }
         }
     }
