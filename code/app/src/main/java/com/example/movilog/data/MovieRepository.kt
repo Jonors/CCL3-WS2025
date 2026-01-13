@@ -13,4 +13,8 @@ class MovieRepository(
 
     suspend fun searchMovies(token: String, query: String) =
         apiService.searchMovies(token, query)
+
+    suspend fun fetchMovieDetails(token: String, movieId: Int) =
+        apiService.getMovieDetails(token, movieId)
+
 }

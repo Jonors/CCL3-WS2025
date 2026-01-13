@@ -68,4 +68,36 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             }
         }
     }
+
+    data class MovieDetailUiState(
+        val isLoading: Boolean = true,
+        val details: com.example.movilog.data.remote.MovieDetailsDto? = null,
+        val inWatchlist: Boolean = false,
+        val isWatched: Boolean = false,
+        val userRating: Float? = null
+    )
+
+    private val _detailState = MutableStateFlow(MovieDetailUiState())
+    val detailState: StateFlow<MovieDetailUiState> = _detailState.asStateFlow()
+
+    fun loadMovieDetails(movieId: Int) {
+        viewModelScope.launch {
+            _detailState.value = MovieDetailUiState(isLoading = true)
+            try {
+                val details = repository.fetchMovieDetails(token, movieId)
+
+                // TODO: später aus Room lesen (User-Status pro Movie)
+                _detailState.value = MovieDetailUiState(
+                    isLoading = false,
+                    details = details,
+                    inWatchlist = false,
+                    isWatched = false,
+                    userRating = null
+                )
+            } catch (e: Exception) {
+                _detailState.value = MovieDetailUiState(isLoading = false, details = null)
+            }
+        }
+    }
+
 }
