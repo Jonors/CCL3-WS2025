@@ -10,7 +10,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
-import com.example.movilog.ui.viewmodel.MovieViewModel
+import com.example.movilog.ui.MovieViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

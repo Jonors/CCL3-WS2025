@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.remote.MovieDetailsDto
-import com.example.movilog.ui.viewmodel.MovieViewModel
+import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.RatingsCard
 import com.example.movilog.ui.detail.MarkWatchedDialog
 

@@ -1,6 +1,7 @@
 package com.example.movilog.data.repository
 
 import com.example.movilog.data.local.MovieDao
+import com.example.movilog.data.model.Movie
 import com.example.movilog.data.remote.TmdbApiService
 
 class MovieRepository(
@@ -23,6 +24,11 @@ class MovieRepository(
     suspend fun markAsWatched(movieId: Int, rating: Float, watchedAt: Long) = movieDao.setWatched(movieId, rating, watchedAt)
     suspend fun delete(movieId: Int) = movieDao.deleteMovie(movieId)
     suspend fun getMovieById(movieId: Int) = movieDao.getMovieById(movieId)
-}
+
     suspend fun fetchNowPlayingMovies(token: String) =
         apiService.getNowPlayingMovies(token)
+
+    suspend fun fetchUpcomingMovies(token: String) =
+        apiService.getUpcomingMovies(token)
+}
+

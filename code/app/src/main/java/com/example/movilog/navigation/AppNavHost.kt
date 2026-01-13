@@ -12,11 +12,11 @@ import com.example.movilog.ui.BrowseScreen
 import com.example.movilog.ui.detail.MovieDetailScreen
 import com.example.movilog.ui.watchlist.WatchlistScreen
 import com.example.movilog.ui.lists.MyListsScreen
-import com.example.movilog.ui.viewmodel.MovieViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
+import com.example.movilog.ui.MovieViewModel
 
 
 @Composable
