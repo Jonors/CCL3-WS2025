@@ -9,7 +9,7 @@ import com.example.movilog.data.local.AppDatabase
 import com.example.movilog.data.remote.TmdbApiService
 import com.example.movilog.navigation.AppNavHost
 import com.example.movilog.ui.BrowseScreen
-import com.example.movilog.ui.MovieViewModel
+import com.example.movilog.ui.viewmodel.MovieViewModel
 import com.example.movilog.ui.MovieViewModelFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

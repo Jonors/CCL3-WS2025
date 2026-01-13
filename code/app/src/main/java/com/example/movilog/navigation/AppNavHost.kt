@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.movilog.ui.BrowseScreen
 import com.example.movilog.ui.MovieDetailScreen
-import com.example.movilog.ui.MovieViewModel
+import com.example.movilog.ui.viewmodel.MovieViewModel
 
 @Composable
 fun AppNavHost(viewModel: MovieViewModel) {

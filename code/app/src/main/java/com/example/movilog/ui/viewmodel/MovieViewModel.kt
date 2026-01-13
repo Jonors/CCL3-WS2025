@@ -1,10 +1,11 @@
-package com.example.movilog.ui
+package com.example.movilog.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movilog.data.repository.MovieRepository
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.remote.MovieDetailsDto
+import com.example.movilog.data.repository.MovieRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -130,7 +131,7 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
     data class MovieDetailUiState(
         val isLoading: Boolean = true,
-        val details: com.example.movilog.data.remote.MovieDetailsDto? = null,
+        val details: MovieDetailsDto? = null,
         val inWatchlist: Boolean = false,
         val isWatched: Boolean = false,
         val userRating: Float? = null

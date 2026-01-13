@@ -24,6 +24,7 @@ import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.theme.SurfaceNavy
 import com.example.movilog.ui.theme.TextSecondary
 import com.example.movilog.ui.theme.TextWhite
+import com.example.movilog.ui.viewmodel.MovieViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
