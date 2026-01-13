@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
     // ✅ Hier dein TMDB v4 Read Access Token rein:
-    private val token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YzgzOGIwYmI1ZjJmMjhhZDRmYTM3NzIwMjZjNWZkOSIsIm5iZiI6MTc2NzYyOTQ1OS43NjYsInN1YiI6IjY5NWJlMjkzZWM4NmQyZDY4ZjE3YmI0NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.j0chOgmWycwc9o23qJFXuzrkIoPyfVGZLPNra0-i6Us"
+    private val token =
+        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YzgzOGIwYmI1ZjJmMjhhZDRmYTM3NzIwMjZjNWZkOSIsIm5iZiI6MTc2NzYyOTQ1OS43NjYsInN1YiI6IjY5NWJlMjkzZWM4NmQyZDY4ZjE3YmI0NyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.j0chOgmWycwc9o23qJFXuzrkIoPyfVGZLPNra0-i6Us"
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -25,12 +26,22 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
     val upcomingMovies: StateFlow<List<Movie>> = _upcomingMovies.asStateFlow()
 
+    private val _topRatedMovies = MutableStateFlow<List<Movie>>(emptyList())
+
+    val topRatedMovies: StateFlow<List<Movie>> = _topRatedMovies.asStateFlow()
+
+    private val _nowPlayingMovies = MutableStateFlow<List<Movie>>(emptyList())
+
+    val nowPlayingMovies: StateFlow<List<Movie>> = _nowPlayingMovies.asStateFlow()
+
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults: StateFlow<List<Movie>> = _searchResults.asStateFlow()
 
     init {
         fetchPopularMovies()
         fetchUpcomingMovies()
+        fetchTopRatedMovies()
+        fetchNowPlayingMovies()
     }
 
     fun fetchPopularMovies() {
@@ -58,6 +69,35 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             }
         }
     }
+
+    fun fetchTopRatedMovies() {
+        viewModelScope.launch {
+            try {
+                val response = repository.fetchTopRatedMovies(token)
+                _topRatedMovies.value = response.results
+                Log.d("TMDB", "Upcoming loaded: ${response.results.size}")
+            } catch (e: Exception) {
+                _topRatedMovies.value = emptyList()
+                Log.e("TMDB", "Failed to load top-rated movies", e)
+            }
+        }
+    }
+
+    fun fetchNowPlayingMovies() {
+        viewModelScope.launch {
+            try {
+                val response = repository.fetchNowPlayingMovies(token)
+                _nowPlayingMovies.value = response.results
+                Log.d("TMDB", "Upcoming loaded: ${response.results.size}")
+            } catch (e: Exception) {
+                _nowPlayingMovies.value = emptyList()
+                Log.e("TMDB", "Failed to load now-playing movies", e)
+            }
+        }
+    }
+
+
+
 
 
     fun onQueryChange(newValue: String) {

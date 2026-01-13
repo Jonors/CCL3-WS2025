@@ -14,6 +14,12 @@ class MovieRepository(
     suspend fun fetchUpcomingMovies(token: String) =
         apiService.getUpcomingMovies(token)
 
+    suspend fun fetchTopRatedMovies(token: String) =
+        apiService.getTopRatedMovies(token)
+
+    suspend fun fetchNowPlayingMovies(token: String) =
+        apiService.getNowPlayingMovies(token)
+
     suspend fun searchMovies(token: String, query: String) =
         apiService.searchMovies(token, query)
 

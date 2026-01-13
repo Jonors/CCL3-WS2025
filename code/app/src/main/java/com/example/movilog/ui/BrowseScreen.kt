@@ -25,13 +25,19 @@ fun BrowseScreen(
     onMovieClick: (Movie) -> Unit = {}
 ) {
     val query by viewModel.query.collectAsState()
+
     val popular by viewModel.popularMovies.collectAsState()
     val upcoming by viewModel.upcomingMovies.collectAsState()
+    val topRated by viewModel.topRatedMovies.collectAsState()
+    val nowPlaying by viewModel.nowPlayingMovies.collectAsState()
     val search by viewModel.searchResults.collectAsState()
 
     val isSearching = query.trim().isNotEmpty()
+
     val popularToShow = if (isSearching) search else popular
     val upcomingToShow = if (isSearching) search else upcoming
+    val topRatedToShow = if (isSearching) search else topRated
+    val nowPlayingToShow = if (isSearching) search else nowPlaying
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -70,9 +76,9 @@ fun BrowseScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()) // Parent scroll
         ) {
-            // --- POPULAR SECTION ---
+            //popular
             Text(
-                text = "Popular",
+                text = if (!isSearching) "Popular" else "",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(16.dp)
             )
@@ -87,9 +93,9 @@ fun BrowseScreen(
                     }
                 }
             }
-
+            // upcoming
             Text(
-                text = "Upcoming movies count: ${upcomingToShow.size}",
+                text = if (!isSearching) "Popular" else "",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(16.dp)
             )
@@ -98,6 +104,38 @@ fun BrowseScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(upcomingToShow) { movie ->
+                    Box(modifier = Modifier.width(160.dp)) {
+                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
+                    }
+                }
+            }
+            //top rated
+            Text(
+                text = if (!isSearching) "Top Rated" else "",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(topRatedToShow) { movie ->
+                    Box(modifier = Modifier.width(160.dp)) {
+                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
+                    }
+                }
+            }
+            //now playing
+            Text(
+                text =  if (!isSearching) "Now Playing" else "",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(nowPlayingToShow) { movie ->
                     Box(modifier = Modifier.width(160.dp)) {
                         MovieCard(movie = movie, onClick = { onMovieClick(movie) })
                     }
