@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
-import com.example.movilog.data.MovieRepository
+import com.example.movilog.data.repository.MovieRepository
 import com.example.movilog.data.local.AppDatabase
 import com.example.movilog.data.remote.TmdbApiService
 import com.example.movilog.navigation.AppNavHost

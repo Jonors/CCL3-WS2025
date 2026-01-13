@@ -3,7 +3,7 @@ package com.example.movilog.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movilog.data.MovieRepository
+import com.example.movilog.data.repository.MovieRepository
 import com.example.movilog.data.model.Movie
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

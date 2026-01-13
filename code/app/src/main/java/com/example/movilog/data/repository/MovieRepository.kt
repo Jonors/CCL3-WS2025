@@ -1,5 +1,4 @@
-package com.example.movilog.data
-
+package com.example.movilog.data.repository
 
 import com.example.movilog.data.local.MovieDao
 import com.example.movilog.data.remote.TmdbApiService

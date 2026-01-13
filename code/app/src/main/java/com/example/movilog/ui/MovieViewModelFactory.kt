@@ -2,7 +2,7 @@ package com.example.movilog.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.movilog.data.MovieRepository
+import com.example.movilog.data.repository.MovieRepository
 
 class MovieViewModelFactory(
     private val repository: MovieRepository
