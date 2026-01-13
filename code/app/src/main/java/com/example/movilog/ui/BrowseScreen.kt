@@ -1,22 +1,29 @@
 package com.example.movilog.ui
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.movilog.R // Ensure this matches your package
 import com.example.movilog.data.model.Movie
+import com.example.movilog.ui.theme.SurfaceNavy
+import com.example.movilog.ui.theme.TextSecondary
+import com.example.movilog.ui.theme.TextWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,123 +32,148 @@ fun BrowseScreen(
     onMovieClick: (Movie) -> Unit = {}
 ) {
     val query by viewModel.query.collectAsState()
-
     val popular by viewModel.popularMovies.collectAsState()
     val upcoming by viewModel.upcomingMovies.collectAsState()
     val topRated by viewModel.topRatedMovies.collectAsState()
     val nowPlaying by viewModel.nowPlayingMovies.collectAsState()
-    val search by viewModel.searchResults.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
 
     val isSearching = query.trim().isNotEmpty()
 
-    val popularToShow = if (isSearching) search else popular
-    val upcomingToShow = if (isSearching) search else upcoming
-    val topRatedToShow = if (isSearching) search else topRated
-    val nowPlayingToShow = if (isSearching) search else nowPlaying
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFF00121D) // Deep Navy Background from screenshot
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // --- HEADER ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Placeholder for your Logo
+                Image(
+                    painter = painterResource(id = R.drawable.logo), // Replace with R.drawable.logo
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Movilog",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold, // Use your Akhand-like font here
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+            // --- SEARCH BAR ---
+            TextField(
+                value = query,
+                onValueChange = viewModel::onQueryChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(24.dp)),
+                placeholder = {
+                    Text("Search movies...", color = TextSecondary, style = MaterialTheme.typography.labelLarge)
+                },
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary)
+                },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    // Background color
+                    focusedContainerColor = SurfaceNavy,
+                    unfocusedContainerColor = SurfaceNavy,
+                    disabledContainerColor = SurfaceNavy,
+                    // Indicators (set to Transparent to remove the bottom line)
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    // Text colors
+                    focusedTextColor = TextWhite,
+                    unfocusedTextColor = TextWhite
+                )
+            )
 
+            Spacer(Modifier.height(24.dp))
+
+            // --- CONTENT ---
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (isSearching) {
+                    MovieSection("Search Results", searchResults, onMovieClick)
+                } else {
+                    MovieSection("Popular Movies", popular, onMovieClick)
+                    MovieSection("Kids", upcoming, onMovieClick) // Using upcoming as 'Kids' placeholder
+                    MovieSection("New Movies", nowPlaying, onMovieClick)
+                    MovieSection("Top Rated", topRated, onMovieClick)
+                }
+                Spacer(Modifier.height(80.dp)) // Bottom padding for navigation
+            }
+        }
+    }
+}
+
+@Composable
+private fun MovieSection(
+    title: String,
+    movies: List<Movie>,
+    onMovieClick: (Movie) -> Unit
+) {
+    if (movies.isEmpty()) return
+
+    Column(modifier = Modifier.padding(bottom = 24.dp)) {
         Text(
-            text = "MoviLog",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+            text = title,
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(movies) { movie ->
+                MovieCard(movie, onMovieClick)
+            }
+        }
+    }
+}
 
-        TextField(
-            value = query,
-            onValueChange = viewModel::onQueryChange,
+@Composable
+private fun MovieCard(movie: Movie, onClick: (Movie) -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(140.dp)
+            .clickable { onClick(movie) }
+    ) {
+        val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+
+        AsyncImage(
+            model = posterUrl,
+            contentDescription = movie.title,
             modifier = Modifier
+                .height(200.dp)
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            placeholder = { Text("Search movies...") },
-            singleLine = true
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop
         )
 
         Spacer(Modifier.height(8.dp))
 
-//        // ✅ Debug text: zeigt dir sofort ob Daten ankommen
-//        Text(
-//            text = "Movies loaded: ${moviesToShow.size}",
-//            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-//        )
-
         Text(
-            text = if (isSearching) "Search Results" else "",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            text = movie.title,
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            fontWeight = FontWeight.Medium
         )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()) // Parent scroll
-        ) {
-            //popular
-            Text(
-                text = if (!isSearching) "Popular" else "",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(popularToShow) { movie ->
-                    // Constraint the width so the card doesn't take the whole screen
-                    Box(modifier = Modifier.width(160.dp)) {
-                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
-                    }
-                }
-            }
-            // upcoming
-            Text(
-                text = if (!isSearching) "Popular" else "",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(upcomingToShow) { movie ->
-                    Box(modifier = Modifier.width(160.dp)) {
-                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
-                    }
-                }
-            }
-            //top rated
-            Text(
-                text = if (!isSearching) "Top Rated" else "",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(topRatedToShow) { movie ->
-                    Box(modifier = Modifier.width(160.dp)) {
-                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
-                    }
-                }
-            }
-            //now playing
-            Text(
-                text =  if (!isSearching) "Now Playing" else "",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(nowPlayingToShow) { movie ->
-                    Box(modifier = Modifier.width(160.dp)) {
-                        MovieCard(movie = movie, onClick = { onMovieClick(movie) })
-                    }
-                }
-            }
-        }
     }
 }
 
