@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.ui.MovieViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -48,7 +51,6 @@ fun WatchlistScreen(
         }
     }
 }
-
 @Composable
 private fun WatchlistRow(
     movie: Movie,
@@ -56,50 +58,88 @@ private fun WatchlistRow(
     onDelete: () -> Unit
 ) {
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
+    val accent = Color(0xFFF2B400)
+    val deleteRed = Color(0xFFE85B5B)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         onClick = onOpen
     ) {
-        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
             AsyncImage(
                 model = posterUrl,
                 contentDescription = movie.title,
-                modifier = Modifier.size(width = 54.dp, height = 80.dp)
+                modifier = Modifier
+                    .size(width = 54.dp, height = 80.dp)
+                    .clip(RoundedCornerShape(12.dp))
             )
 
-            Column(Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
-                    movie.title,
+                    text = movie.title,
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(Modifier.height(8.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // Watched (gelb)
                     Button(
-                        onClick = onOpen,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF2B400), contentColor = Color.Black),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) { Text("Watched") }
+                        onClick = onOpen, // du öffnest Detail -> dort "Watched" Dialog
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = accent,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(999.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text("Watched", style = MaterialTheme.typography.labelLarge)
+                    }
 
-                    OutlinedButton(
+                    // Delete (rot)
+                    Button(
                         onClick = onDelete,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) { Text("Delete") }
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = deleteRed,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(999.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text("Delete", style = MaterialTheme.typography.labelLarge)
+                    }
                 }
             }
 
-            // right side: show userRating if exists (else placeholder)
-            Text(
-                text = movie.userRating?.let { String.format("%.1f★", it) } ?: "",
-                color = Color(0xFFF2B400),
-                style = MaterialTheme.typography.titleMedium
-            )
+            // Right side rating (TMDB average)
+            val avg = (movie.voteAverage ?: movie.userRating) // fallback
+            if (avg != null && avg > 0f) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = String.format("%.1f", avg),
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "★",
+                        color = accent,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
         }
     }
 }

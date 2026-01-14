@@ -17,5 +17,6 @@ data class Movie(
     var isWatched: Boolean = false,
     var userRating: Float? = null,        // Pflicht sobald watched
     var watchedAt: Long? = null,
-    var runtimeMinutes: Int? = null
-    )
+    var runtimeMinutes: Int? = null,
+    val voteAverage: Float? = null
+)
