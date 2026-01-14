@@ -19,11 +19,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.movilog.R // Ensure this matches your package
+import com.example.movilog.R
 import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.theme.SurfaceNavy
 import com.example.movilog.ui.theme.TextSecondary
 import com.example.movilog.ui.theme.TextWhite
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.ui.text.style.TextOverflow
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,13 +111,18 @@ fun BrowseScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 if (isSearching) {
-                    MovieSection("Search Results", searchResults, onMovieClick)
+                    SearchResultsGrid(
+                        title = "Search Results",
+                        movies = searchResults,
+                        onMovieClick = onMovieClick
+                    )
                 } else {
                     MovieSection("Popular Movies", popular, onMovieClick)
-                    MovieSection("Upcoming Movies", upcoming, onMovieClick) // Using upcoming as 'Kids' placeholder
+                    MovieSection("Upcoming Movies", upcoming, onMovieClick)
                     MovieSection("New Movies", nowPlaying, onMovieClick)
                     MovieSection("Top Rated", topRated, onMovieClick)
                 }
+
                 Spacer(Modifier.height(80.dp)) // Bottom padding for navigation
             }
         }
@@ -176,13 +186,59 @@ private fun MovieCard(movie: Movie, onClick: (Movie) -> Unit) {
         )
     }
 }
+@Composable
+private fun SearchResultsGrid(
+    title: String,
+    movies: List<Movie>,
+    onMovieClick: (Movie) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        if (movies.isEmpty()) {
+            Text(
+                text = "No results.",
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            return
+        }
+
+        // ✅ Grid inside scroll container:
+        // IMPORTANT: since your outer content is verticalScroll(),
+        // we disable grid's own scrolling and let the parent scroll.
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 2000.dp), // prevents "infinite height" issues
+            userScrollEnabled = false,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            gridItems(movies, key = { it.id }) { movie ->
+                GridMovieCard(movie = movie, onClick = onMovieClick)
+            }
+        }
+    }
+}
 
 @Composable
-private fun MovieCard(movie: Movie, onClick: () -> Unit) {
-    Card(
+private fun GridMovieCard(
+    movie: Movie,
+    onClick: (Movie) -> Unit
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { onClick(movie) }
     ) {
         val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
 
@@ -190,16 +246,20 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
             model = posterUrl,
             contentDescription = movie.title,
             modifier = Modifier
-                .height(240.dp)
-                .fillMaxWidth(),
+                .aspectRatio(2f / 3f) // nice poster ratio
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop
         )
 
+        Spacer(Modifier.height(6.dp))
+
         Text(
             text = movie.title,
-            modifier = Modifier.padding(10.dp),
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 2
+            color = Color.White,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
