@@ -109,7 +109,7 @@ fun BrowseScreen(
                     MovieSection("Search Results", searchResults, onMovieClick)
                 } else {
                     MovieSection("Popular Movies", popular, onMovieClick)
-                    MovieSection("Kids", upcoming, onMovieClick) // Using upcoming as 'Kids' placeholder
+                    MovieSection("Upcoming Movies", upcoming, onMovieClick) // Using upcoming as 'Kids' placeholder
                     MovieSection("New Movies", nowPlaying, onMovieClick)
                     MovieSection("Top Rated", topRated, onMovieClick)
                 }
