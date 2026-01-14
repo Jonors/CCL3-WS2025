@@ -360,5 +360,17 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun removeMovieFromList(listId: Long, movieId: Int) {
+        viewModelScope.launch {
+            repository.removeMovieFromList(listId, movieId)
+        }
+    }
+
+    fun deleteCustomList(listId: Long) {
+        viewModelScope.launch {
+            repository.deleteCustomList(listId)
+        }
+    }
 }
 
