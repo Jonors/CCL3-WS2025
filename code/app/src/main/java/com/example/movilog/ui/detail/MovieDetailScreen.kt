@@ -186,7 +186,7 @@ fun MovieDetailScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
                             cardBg = cardBg,
-                            userRating = state.userRating ?: d.voteAverage ?: 0f
+                            userRating = d.voteAverage ?: 0f
                         )
                         Spacer(Modifier.height(24.dp))
                     }
