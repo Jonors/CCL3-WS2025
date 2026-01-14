@@ -273,6 +273,7 @@ private fun InfoChip(label: String) {
 
 // New File: com.example.movilog.ui.detail.AddToListDialog.kt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddToListDialog(
     availableLists: List<CustomList>,
@@ -282,36 +283,79 @@ fun AddToListDialog(
 ) {
     var newListName by remember { mutableStateOf("") }
 
+    // Theme constants used in your Detail Screen
+    val bg = Color(0xFF0B2A36)
+    val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
+    val accent = Color(0xFFF2B400)
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add to Custom List") },
+        containerColor = bg, // Matches page background
+        shape = RoundedCornerShape(24.dp), // Matches HeroCard shape
+        title = {
+            Text(
+                "Add to Custom List",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // List existing lists
                 if (availableLists.isEmpty()) {
-                    Text("No lists created yet.", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "No lists created yet.",
+                        color = Color.White.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 } else {
                     LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
                         items(availableLists) { list ->
                             TextButton(
                                 onClick = { onListSelected(list.listId) },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp),
+                                colors = ButtonDefaults.textButtonColors(contentColor = accent)
                             ) {
-                                Text(list.listName, color = Color.Black)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(list.listName, style = MaterialTheme.typography.bodyLarge)
+                                }
                             }
                         }
                     }
                 }
 
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = Color.White.copy(alpha = 0.1f)
+                )
 
                 // Create New List field
                 OutlinedTextField(
                     value = newListName,
                     onValueChange = { newListName = it },
                     label = { Text("New List Name") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedLabelColor = accent,
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
+                        focusedBorderColor = accent,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        cursorColor = accent
+                    )
                 )
+
+                Spacer(Modifier.height(12.dp))
+
                 Button(
                     onClick = {
                         if (newListName.isNotBlank()) {
@@ -319,20 +363,21 @@ fun AddToListDialog(
                             newListName = ""
                         }
                     },
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .align(Alignment.End)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = accent),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Create & Add")
+                    Text("Create & Add", color = Color.Black)
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = Color.White.copy(alpha = 0.7f))
+            }
         }
     )
 }
-
 private fun formatRuntime(runtimeMinutes: Int?): String {
     if (runtimeMinutes == null || runtimeMinutes <= 0) return "—"
     val h = runtimeMinutes / 60
