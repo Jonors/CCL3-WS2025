@@ -9,6 +9,7 @@ import com.example.movilog.data.model.Movie
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.data.repository.MovieRepository
 import com.example.movilog.ui.stats.StatsUiState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -373,6 +374,10 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         viewModelScope.launch {
             repository.deleteCustomList(listId)
         }
+    }
+
+    fun getMoviesForList(listId: Long): Flow<ListWithMovies> {
+        return repository.getMoviesByListId(listId)
     }
 }
 

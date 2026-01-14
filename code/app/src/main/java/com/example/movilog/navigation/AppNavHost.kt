@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
+import com.example.movilog.ui.CustomLists.CustomListDetailScreen
 import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.stats.StatsScreen
 
@@ -45,7 +46,9 @@ fun AppNavHost(viewModel: MovieViewModel) {
                         selected = isSelected,
                         onClick = {
                             navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -59,8 +62,7 @@ fun AppNavHost(viewModel: MovieViewModel) {
                                 )
                                 Spacer(Modifier.height(4.dp))
                             }
-                        }
-                        ,
+                        },
                         label = {
                             Text(
                                 text = item.label,
@@ -109,6 +111,10 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     viewModel = viewModel,
                     onMovieClick = { id ->
                         navController.navigate("${Routes.MOVIE_DETAIL}/$id")
+                    },
+                    // ADD THIS PART TO FIX THE ERROR:
+                    onListClick = { listId ->
+                        navController.navigate("custom_list_detail/$listId")
                     }
                 )
             }
@@ -131,7 +137,37 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable(Routes.MY_LISTS) {
+                MyListsScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { id ->
+                        navController.navigate("${Routes.MOVIE_DETAIL}/$id")
+                    },
+                    // NEW CALLBACK: Navigate to the folder detail view
+                    onListClick = { listId ->
+                        navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$listId")
+                    }
+                )
+            }
+
+// Update your detail route to use the constant
+            composable(
+                route = "${Routes.CUSTOM_LIST_DETAIL}/{listId}",
+                arguments = listOf(navArgument("listId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val listId = backStackEntry.arguments?.getLong("listId") ?: 0L
+                CustomListDetailScreen(
+                    listId = listId,
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onMovieClick = { movieId ->
+                        navController.navigate("${Routes.MOVIE_DETAIL}/$movieId")
+                    }
+                )
+            }
+
         }
+
     }
 }
 

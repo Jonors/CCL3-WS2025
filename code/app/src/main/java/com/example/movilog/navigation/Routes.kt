@@ -7,6 +7,8 @@ object Routes {
     const val WATCHLIST = "watchlist"
     const val MY_LISTS = "mylists"
     const val STATS = "stats"
-
     const val MOVIE_DETAIL = "movieDetail"
+
+    // NEW ROUTE
+    const val CUSTOM_LIST_DETAIL = "custom_list_detail"
 }
