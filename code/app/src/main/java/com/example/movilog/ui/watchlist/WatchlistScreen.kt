@@ -15,6 +15,9 @@ import com.example.movilog.data.model.Movie
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.ui.MovieViewModel
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+
 
 @Composable
 fun WatchlistScreen(
@@ -22,35 +25,49 @@ fun WatchlistScreen(
     onMovieClick: (Int) -> Unit
 ) {
     val watchlist by viewModel.watchlist.collectAsState(initial = emptyList())
-
     val bg = Color(0xFF0B2A36)
 
     Scaffold(containerColor = bg) { padding ->
-        Column(
-            Modifier
+        LazyColumn(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Watchlist", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(12.dp))
+            item {
+                Text(
+                    "Watchlist",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(Modifier.height(12.dp))
+            }
 
             if (watchlist.isEmpty()) {
-                Text("No movies in your watchlist yet.", color = Color.White.copy(alpha = 0.8f))
+                item {
+                    Text(
+                        "No movies in your watchlist yet.",
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+                }
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    watchlist.forEach { movie ->
-                        WatchlistRow(
-                            movie = movie,
-                            onOpen = { onMovieClick(movie.id) },
-                            onDelete = { viewModel.deleteMovie(movie.id) }
-                        )
-                    }
+                items(
+                    items = watchlist,
+                    key = { it.id } // ✅ stable key
+                ) { movie ->
+                    WatchlistRow(
+                        movie = movie,
+                        onOpen = { onMovieClick(movie.id) },
+                        onDelete = { viewModel.deleteMovie(movie.id) }
+                    )
                 }
             }
         }
     }
 }
+
 @Composable
 private fun WatchlistRow(
     movie: Movie,
@@ -68,7 +85,7 @@ private fun WatchlistRow(
         onClick = onOpen
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }

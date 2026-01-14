@@ -2,6 +2,7 @@ package com.example.movilog.ui.stats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.MovieViewModel
-import kotlin.math.roundToInt
+
 
 @Composable
 fun StatsScreen(
@@ -23,76 +24,85 @@ fun StatsScreen(
     onMovieClick: (Int) -> Unit
 ) {
     val state by viewModel.statsState.collectAsState()
-
     val bg = Color(0xFF0B2A36)
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
     val accent = Color(0xFFF2B400)
 
     Scaffold(containerColor = bg) { padding ->
-        Column(
-            Modifier
+        LazyColumn(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Statistics", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(14.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(
-                    title = "Movies Watched",
-                    value = state.watchedCount.toString(),
-                    cardBg = cardBg,
-                    modifier = Modifier.weight(1f)
-                )
-                StatCard(
-                    title = "Time spent overall",
-                    value = formatTotalTime(state.totalMinutes),
-                    cardBg = cardBg,
-                    modifier = Modifier.weight(1f)
-                )
+            item {
+                Text("Statistics", color = Color.White, style = MaterialTheme.typography.headlineMedium)
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            Card(
-                colors = CardDefaults.cardColors(containerColor = cardBg),
-                shape = RoundedCornerShape(18.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(Modifier.padding(14.dp)) {
-                    Text(
-                        "Movies watched this month",
-                        color = Color.White.copy(alpha = 0.9f),
-                        style = MaterialTheme.typography.titleSmall
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatCard(
+                        title = "Movies Watched",
+                        value = state.watchedCount.toString(),
+                        cardBg = cardBg,
+                        modifier = Modifier.weight(1f)
                     )
-                    Text(
-                        state.monthLabel,
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(Modifier.height(10.dp))
-
-                    MonthlyHeatmap(
-                        heatmap = state.heatmap,
-                        accent = accent
+                    StatCard(
+                        title = "Time spent overall",
+                        value = formatTotalTime(state.totalMinutes),
+                        cardBg = cardBg,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = cardBg),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(14.dp)) {
+                        Text(
+                            "Movies watched this month",
+                            color = Color.White.copy(alpha = 0.9f),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            state.monthLabel,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(Modifier.height(10.dp))
 
-            Text("Favorite Movies", color = Color.White, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(10.dp))
-            PosterRow(movies = state.favorites, onMovieClick = onMovieClick)
+                        MonthlyHeatmap(
+                            heatmap = state.heatmap,
+                            accent = accent
+                        )
+                    }
+                }
+            }
 
-            Spacer(Modifier.height(16.dp))
+            item {
+                Text("Favorite Movies", color = Color.White, style = MaterialTheme.typography.titleLarge)
+            }
 
-            Text("Recently Watched Movies", color = Color.White, style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(10.dp))
-            PosterRow(movies = state.recent, onMovieClick = onMovieClick)
+            item {
+                PosterRow(movies = state.favorites, onMovieClick = onMovieClick)
+            }
+
+            item {
+                Text("Recently Watched Movies", color = Color.White, style = MaterialTheme.typography.titleLarge)
+            }
+
+            item {
+                PosterRow(movies = state.recent, onMovieClick = onMovieClick)
+            }
         }
     }
+
 }
 
 @Composable
