@@ -2,6 +2,7 @@ package com.example.movilog.data.repository
 
 import com.example.movilog.data.local.MovieDao
 import com.example.movilog.data.model.CustomList
+import com.example.movilog.data.model.ListWithMovies
 import com.example.movilog.data.model.Movie
 import com.example.movilog.data.model.MovieListCrossRef
 import com.example.movilog.data.remote.TmdbApiService
@@ -55,5 +56,8 @@ class MovieRepository(
 
     suspend fun deleteCustomList(listId: Long) = movieDao.deleteFullCustomList(listId)
 
+    fun getMoviesByListId(listId: Long): Flow<ListWithMovies> {
+        return movieDao.getMoviesByListId(listId)
+    }
 }
 
