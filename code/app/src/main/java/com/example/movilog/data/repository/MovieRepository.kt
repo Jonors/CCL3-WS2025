@@ -51,5 +51,9 @@ class MovieRepository(
 
     fun observeMovieById(movieId: Int) = movieDao.observeMovieById(movieId)
 
+    suspend fun removeMovieFromList(listId: Long, movieId: Int) = movieDao.removeMovieFromList(listId, movieId)
+
+    suspend fun deleteCustomList(listId: Long) = movieDao.deleteFullCustomList(listId)
+
 }
 

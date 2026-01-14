@@ -62,9 +62,23 @@ interface MovieDao {
     @Query("SELECT * FROM custom_lists WHERE listId = :listId")
     fun getMoviesByListId(listId: Long): Flow<ListWithMovies>
 
+    @Query("SELECT * FROM custom_lists")
+    fun getAllCustomLists(): Flow<List<CustomList>>
+
+    // Remove a specific movie from a specific custom list
     @Query("DELETE FROM movie_list_cross_ref WHERE listId = :listId AND movieId = :movieId")
     suspend fun removeMovieFromList(listId: Long, movieId: Int)
 
-    @Query("SELECT * FROM custom_lists")
-    fun getAllCustomLists(): Flow<List<CustomList>>
+    // Delete the list and all its movie associations
+    @Transaction
+    suspend fun deleteFullCustomList(listId: Long) {
+        deleteMovieAssociationsForList(listId)
+        deleteListEntity(listId)
+    }
+
+    @Query("DELETE FROM movie_list_cross_ref WHERE listId = :listId")
+    suspend fun deleteMovieAssociationsForList(listId: Long)
+
+    @Query("DELETE FROM custom_lists WHERE listId = :listId")
+    suspend fun deleteListEntity(listId: Long)
 }
