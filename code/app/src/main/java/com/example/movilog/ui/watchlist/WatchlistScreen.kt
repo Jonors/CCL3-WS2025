@@ -100,7 +100,7 @@ private fun WatchlistRow(
                             containerColor = accent,
                             contentColor = Color.Black
                         ),
-                        shape = RoundedCornerShape(999.dp),
+                        shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                     ) {
                         Text("Watched", style = MaterialTheme.typography.labelLarge)
@@ -113,7 +113,7 @@ private fun WatchlistRow(
                             containerColor = deleteRed,
                             contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(999.dp),
+                        shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                     ) {
                         Text("Delete", style = MaterialTheme.typography.labelLarge)
@@ -122,24 +122,32 @@ private fun WatchlistRow(
             }
 
             // Right side rating (TMDB average)
-            val avg = (movie.voteAverage ?: movie.userRating) // fallback
+            // Right side rating (TMDB average) – vertically centered
+            val avg = (movie.voteAverage ?: movie.userRating)
             if (avg != null && avg > 0f) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = String.format("%.1f", avg),
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "★",
-                        color = accent,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = String.format("%.1f", avg),
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "★",
+                            color = accent,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
             }
+
         }
     }
 }

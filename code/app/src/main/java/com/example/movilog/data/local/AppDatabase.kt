@@ -14,7 +14,7 @@ import com.example.movilog.data.model.MovieListCrossRef
         CustomList::class,
         MovieListCrossRef::class
     ],
-    version = 3, // Ensure this is 3
+    version = 4, // Ensure this is 3
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
