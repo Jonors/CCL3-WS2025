@@ -272,7 +272,9 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
             isWatched = false,
             userRating = null,
             watchedAt = null,
-            runtimeMinutes = d.runtime
+            runtimeMinutes = d.runtime,
+            voteAverage = d.voteAverage
+
         )
 
     fun addCurrentDetailToWatchlist() {
