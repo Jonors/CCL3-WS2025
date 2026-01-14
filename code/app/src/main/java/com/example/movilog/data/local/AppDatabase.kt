@@ -5,8 +5,18 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.model.CustomList
+import com.example.movilog.data.model.MovieListCrossRef
 
-@Database(entities = [Movie::class], version = 2, exportSchema = false)
+@Database(
+    entities = [
+        Movie::class,
+        CustomList::class,
+        MovieListCrossRef::class
+    ],
+    version = 3, // Ensure this is 3
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun movieDao(): MovieDao

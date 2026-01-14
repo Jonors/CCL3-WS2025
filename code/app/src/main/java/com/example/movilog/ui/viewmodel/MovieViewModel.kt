@@ -3,6 +3,8 @@ package com.example.movilog.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movilog.data.model.CustomList
+import com.example.movilog.data.model.ListWithMovies
 import com.example.movilog.data.model.Movie
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.data.repository.MovieRepository
@@ -335,5 +337,30 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         return grid
     }
 
+    // 1. Observe all available custom lists
+    val customLists: StateFlow<List<CustomList>> = repository.getAllCustomLists()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // 2. Function to add movie to a list
+    fun addMovieToList(movieId: Int, listId: Long) {
+        viewModelScope.launch {
+            repository.addMovieToCustomList(movieId, listId)
+        }
+    }
+
+    // 3. Function to create a new list
+    fun createNewList(name: String) {
+        viewModelScope.launch {
+            repository.createCustomList(name)
+        }
+    }
+
+    // Observe all custom collections with their associated movies
+    val customCollections: StateFlow<List<ListWithMovies>> = repository.getCustomLists()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 }
 

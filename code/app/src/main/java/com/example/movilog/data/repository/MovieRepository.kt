@@ -1,8 +1,11 @@
 package com.example.movilog.data.repository
 
 import com.example.movilog.data.local.MovieDao
+import com.example.movilog.data.model.CustomList
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.model.MovieListCrossRef
 import com.example.movilog.data.remote.TmdbApiService
+import kotlinx.coroutines.flow.Flow
 
 class MovieRepository(
     private val movieDao: MovieDao,
@@ -30,6 +33,21 @@ class MovieRepository(
 
     suspend fun fetchUpcomingMovies(token: String) =
         apiService.getUpcomingMovies(token)
+
+    // Fetch all lists (simple list for the selection dialog)
+    fun getAllCustomLists(): Flow<List<CustomList>> = movieDao.getAllCustomLists()
+
+    fun getCustomLists() = movieDao.getAllListsWithMovies()
+
+    // Add movie to a specific list
+    suspend fun addMovieToCustomList(movieId: Int, listId: Long) {
+        movieDao.addMovieToList(MovieListCrossRef(listId = listId, movieId = movieId))
+    }
+
+    // Create a new list (e.g., "Old but Gold")
+    suspend fun createCustomList(name: String) {
+        movieDao.createCustomList(CustomList(listName = name))
+    }
 
     fun observeMovieById(movieId: Int) = movieDao.observeMovieById(movieId)
 
