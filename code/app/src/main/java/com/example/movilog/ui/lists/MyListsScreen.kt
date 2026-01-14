@@ -1,7 +1,10 @@
+// File: com.example.movilog.ui.lists.MyListsScreen.kt
+
 package com.example.movilog.ui.lists
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +16,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.model.ListWithMovies
 import com.example.movilog.ui.MovieViewModel
 
 @Composable
@@ -21,49 +25,57 @@ fun MyListsScreen(
     onMovieClick: (Int) -> Unit
 ) {
     val watched by viewModel.watchedList.collectAsState(initial = emptyList())
+    // Observe the new dynamic collections
+    val customCollections by viewModel.customCollections.collectAsState()
 
     val bg = Color(0xFF0B2A36)
+
     Scaffold(containerColor = bg) { padding ->
-        Column(
-            Modifier
+        // Use LazyColumn to make the whole screen scrollable vertically
+        LazyColumn(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text("My Lists", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(12.dp))
-
-            Text("Watched list", color = Color.White, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(10.dp))
-
-            if (watched.isEmpty()) {
-                Text("No watched movies yet.", color = Color.White.copy(alpha = 0.8f))
-            } else {
-                PosterRow(movies = watched, onMovieClick = onMovieClick)
+            item {
+                Spacer(Modifier.height(16.dp))
+                Text("My Lists", color = Color.White, style = MaterialTheme.typography.headlineMedium)
             }
 
-            Spacer(Modifier.height(18.dp))
+            // --- 1. Static Watched List ---
+            item {
+                Section(title = "Watched list", movies = watched, onMovieClick = onMovieClick)
+            }
 
-            // Sektionen wie im Mock: wir machen’s erstmal automatisch nach Rating
-            val veryGood = watched.filter { (it.userRating ?: 0f) >= 4.0f }
-            val oldButGold = watched.filter { (it.userRating ?: 0f) in 3.0f..3.9f }
+            // --- 2. Dynamic Custom Collections ---
+            // This replaces the hardcoded "Very good" / "Old but Gold" logic
+            // with actual data from your "Add to Collection" dialog
+            items(customCollections) { collection ->
+                Section(
+                    title = collection.customList.listName,
+                    movies = collection.movies,
+                    onMovieClick = onMovieClick
+                )
+            }
 
-            Section(title = "Very good", movies = veryGood, onMovieClick = onMovieClick)
-            Spacer(Modifier.height(16.dp))
-            Section(title = "Old but Gold", movies = oldButGold, onMovieClick = onMovieClick)
+            item { Spacer(Modifier.height(24.dp)) }
         }
     }
 }
 
 @Composable
 private fun Section(title: String, movies: List<Movie>, onMovieClick: (Int) -> Unit) {
-    Text(title, color = Color.White, style = MaterialTheme.typography.titleMedium)
-    Spacer(Modifier.height(10.dp))
+    Column {
+        Text(title, color = Color.White, style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(10.dp))
 
-    if (movies.isEmpty()) {
-        Text("—", color = Color.White.copy(alpha = 0.6f))
-    } else {
-        PosterRow(movies = movies, onMovieClick = onMovieClick)
+        if (movies.isEmpty()) {
+            Text("No movies in this list yet.", color = Color.White.copy(alpha = 0.5f))
+        } else {
+            PosterRow(movies = movies, onMovieClick = onMovieClick)
+        }
     }
 }
 
@@ -76,7 +88,6 @@ private fun PosterRow(movies: List<Movie>, onMovieClick: (Int) -> Unit) {
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .width(120.dp)
-                    .wrapContentHeight()
                     .clickable { onMovieClick(movie.id) }
             ) {
                 Column {
@@ -91,7 +102,8 @@ private fun PosterRow(movies: List<Movie>, onMovieClick: (Int) -> Unit) {
                         text = movie.title,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }

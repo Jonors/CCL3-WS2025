@@ -1,7 +1,10 @@
 package com.example.movilog.data.local
 
 import androidx.room.*
+import com.example.movilog.data.model.CustomList
+import com.example.movilog.data.model.ListWithMovies
 import com.example.movilog.data.model.Movie
+import com.example.movilog.data.model.MovieListCrossRef
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -43,4 +46,25 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE id = :movieId LIMIT 1")
     fun observeMovieById(movieId: Int): kotlinx.coroutines.flow.Flow<Movie?>
 
+    // --- Custom List Methods ---
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun createCustomList(customList: CustomList): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addMovieToList(crossRef: MovieListCrossRef)
+
+    @Transaction // Important: Room does two queries here, so it must be a transaction
+    @Query("SELECT * FROM custom_lists")
+    fun getAllListsWithMovies(): Flow<List<ListWithMovies>>
+
+    @Transaction
+    @Query("SELECT * FROM custom_lists WHERE listId = :listId")
+    fun getMoviesByListId(listId: Long): Flow<ListWithMovies>
+
+    @Query("DELETE FROM movie_list_cross_ref WHERE listId = :listId AND movieId = :movieId")
+    suspend fun removeMovieFromList(listId: Long, movieId: Int)
+
+    @Query("SELECT * FROM custom_lists")
+    fun getAllCustomLists(): Flow<List<CustomList>>
 }

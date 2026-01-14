@@ -2,8 +2,10 @@ package com.example.movilog.ui.detail
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.movilog.data.model.CustomList
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.RatingsCard
@@ -28,7 +31,10 @@ fun MovieDetailScreen(
     LaunchedEffect(movieId) { viewModel.loadMovieDetails(movieId) }
 
     val state by viewModel.detailState.collectAsState()
+    val customLists by viewModel.customLists.collectAsState()
+
     var showWatchedDialog by remember { mutableStateOf(false) }
+    var showAddToListDialog by remember { mutableStateOf(false) }
 
     val bg = Color(0xFF0B2A36)
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
@@ -44,129 +50,78 @@ fun MovieDetailScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = bg,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = bg)
             )
         }
     ) { padding ->
         when {
             state.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-
             state.details == null -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     Text("Failed to load movie details", color = Color.White)
                 }
             }
-
             else -> {
                 val d = state.details!!
-
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
+                    modifier = Modifier.fillMaxSize().padding(padding),
                     contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    item {
-                        HeroCard(
-                            details = d,
-                            cardBg = cardBg,
-                            isWatched = state.isWatched
-                        )
-                        Spacer(Modifier.height(10.dp))
-                    }
+                    item { HeroCard(d, cardBg, state.isWatched) }
 
                     item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            when {
-                                // ✅ 1) Already watched -> only show "Watched" badge/button
-                                state.isWatched -> {
-                                    Button(
-                                        onClick = {},
-                                        enabled = false,
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = accent,
-                                            disabledContainerColor = accent,
-                                            disabledContentColor = Color.Black
-                                        )
-                                    ) {
-                                        Text("Watched")
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                when {
+                                    state.isWatched -> {
+                                        Button(
+                                            onClick = { showAddToListDialog = true },
+                                            modifier = Modifier.weight(1f),
+                                            colors = ButtonDefaults.buttonColors(containerColor = accent)
+                                        ) {
+                                            Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Add to Collection", color = Color.Black)
+                                        }
                                     }
-                                }
-
-                                // ✅ 2) In watchlist -> show disabled "In Watchlist" + Watched button
-                                state.inWatchlist -> {
-                                    OutlinedButton(
-                                        onClick = {},
-                                        enabled = false,
-                                        modifier = Modifier.weight(1f),
-                                        colors = ButtonDefaults.outlinedButtonColors(
-                                            contentColor = Color.White,
-                                            disabledContentColor = Color.White
-                                        )
-                                    ) {
-                                        Text("In Watchlist")
+                                    state.inWatchlist -> {
+                                        OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.weight(1f)) {
+                                            Text("In Watchlist", color = Color.White)
+                                        }
+                                        Button(
+                                            onClick = { showWatchedDialog = true },
+                                            modifier = Modifier.weight(1f),
+                                            colors = ButtonDefaults.buttonColors(containerColor = accent)
+                                        ) {
+                                            Text("Watched", color = Color.Black)
+                                        }
                                     }
-
-                                    Button(
-                                        onClick = { showWatchedDialog = true },
-                                        modifier = Modifier.weight(1f),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = accent,
-                                            contentColor = Color.Black
-                                        )
-                                    ) {
-                                        Text("Watched")
-                                    }
-                                }
-
-                                // ✅ 3) Normal -> show both buttons
-                                else -> {
-                                    OutlinedButton(
-                                        onClick = { viewModel.addCurrentDetailToWatchlist() },
-                                        modifier = Modifier.weight(1f),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                                    ) {
-                                        Text("Add to Watchlist")
-                                    }
-
-                                    Button(
-                                        onClick = { showWatchedDialog = true },
-                                        modifier = Modifier.weight(1f),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = accent,
-                                            contentColor = Color.Black
-                                        )
-                                    ) {
-                                        Text("Watched")
+                                    else -> {
+                                        OutlinedButton(
+                                            onClick = { viewModel.addCurrentDetailToWatchlist() },
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Text("Add to Watchlist", color = Color.White)
+                                        }
+                                        Button(
+                                            onClick = { showWatchedDialog = true },
+                                            modifier = Modifier.weight(1f),
+                                            colors = ButtonDefaults.buttonColors(containerColor = accent)
+                                        ) {
+                                            Text("Watched", color = Color.Black)
+                                        }
                                     }
                                 }
                             }
                         }
-
                         Spacer(Modifier.height(14.dp))
                     }
 
@@ -174,38 +129,51 @@ fun MovieDetailScreen(
                         Text(
                             text = d.overview.ifBlank { "No description available." },
                             color = Color.White,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            style = MaterialTheme.typography.bodyLarge
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         )
                         Spacer(Modifier.height(18.dp))
                     }
 
                     item {
                         RatingsCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                             cardBg = cardBg,
                             userRating = d.voteAverage ?: 0f
                         )
-                        Spacer(Modifier.height(24.dp))
                     }
-                }
-
-                // Dialog overlay
-                if (showWatchedDialog) {
-                    MarkWatchedDialog(
-                        onDismiss = { showWatchedDialog = false },
-                        onConfirm = { rating, watchedAt ->
-                            showWatchedDialog = false
-                            viewModel.markCurrentDetailAsWatched(rating, watchedAt)
-                        }
-                    )
                 }
             }
         }
+
+        // Dialogs
+        if (showWatchedDialog) {
+            MarkWatchedDialog(
+                onDismiss = { showWatchedDialog = false },
+                onConfirm = { rating, watchedAt ->
+                    showWatchedDialog = false
+                    viewModel.markCurrentDetailAsWatched(rating, watchedAt)
+                }
+            )
+        }
+
+        if (showAddToListDialog) {
+            AddToListDialog(
+                availableLists = customLists,
+                onDismiss = { showAddToListDialog = false },
+                onListSelected = { listId ->
+                    viewModel.addMovieToList(movieId, listId)
+                    showAddToListDialog = false
+                },
+                onCreateNewList = { name ->
+                    viewModel.createNewList(name)
+                }
+            )
+        }
     }
 }
+
+// Helper components (HeroCard, InfoChip, etc) stay the same as your original code...
+
 
 @Composable
 private fun HeroCard(
@@ -301,6 +269,68 @@ private fun InfoChip(label: String) {
             style = MaterialTheme.typography.bodySmall
         )
     }
+}
+
+// New File: com.example.movilog.ui.detail.AddToListDialog.kt
+
+@Composable
+fun AddToListDialog(
+    availableLists: List<CustomList>,
+    onDismiss: () -> Unit,
+    onListSelected: (Long) -> Unit,
+    onCreateNewList: (String) -> Unit
+) {
+    var newListName by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add to Custom List") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // List existing lists
+                if (availableLists.isEmpty()) {
+                    Text("No lists created yet.", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                        items(availableLists) { list ->
+                            TextButton(
+                                onClick = { onListSelected(list.listId) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(list.listName, color = Color.Black)
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                // Create New List field
+                OutlinedTextField(
+                    value = newListName,
+                    onValueChange = { newListName = it },
+                    label = { Text("New List Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = {
+                        if (newListName.isNotBlank()) {
+                            onCreateNewList(newListName)
+                            newListName = ""
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .align(Alignment.End)
+                ) {
+                    Text("Create & Add")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Close") }
+        }
+    )
 }
 
 private fun formatRuntime(runtimeMinutes: Int?): String {
