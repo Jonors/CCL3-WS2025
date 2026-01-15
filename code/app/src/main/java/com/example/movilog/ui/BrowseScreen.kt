@@ -36,7 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 fun BrowseScreen(
     viewModel: MovieViewModel,
     onMovieClick: (Movie) -> Unit = {},
-    onSeeAllPopular: () -> Unit = {}
+    onSeeAllPopular: () -> Unit = {},
+    onSeeAllUpcoming: () -> Unit = {}
 ) {
     val query by viewModel.query.collectAsState()
     val popular by viewModel.popularMovies.collectAsState()
@@ -121,7 +122,7 @@ fun BrowseScreen(
                     Spacer(Modifier.height(30.dp))
                 } else {
                     MovieSection("Popular Movies", popular, onMovieClick, onSeeAll = onSeeAllPopular)
-                    MovieSection("Upcoming Movies", upcoming, onMovieClick)
+                    MovieSection("Upcoming Movies", upcoming, onMovieClick, onSeeAll = onSeeAllUpcoming)
                     MovieSection("New Movies", nowPlaying, onMovieClick)
                     MovieSection("Top Rated", topRated, onMovieClick)
                 }
@@ -234,9 +235,6 @@ private fun SearchResultsGrid(
             return
         }
 
-        // ✅ Grid inside scroll container:
-        // IMPORTANT: since your outer content is verticalScroll(),
-        // we disable grid's own scrolling and let the parent scroll.
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier

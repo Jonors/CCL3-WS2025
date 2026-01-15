@@ -4,7 +4,9 @@ package com.example.movilog.navigation
 
 object Routes {
     const val BROWSE = "browse"
+
     const val POPULAR_ALL = "popular_all"
+    const val UPCOMING_ALL = "upcoming_all"
 
     const val WATCHLIST = "watchlist"
     const val MY_LISTS = "mylists"

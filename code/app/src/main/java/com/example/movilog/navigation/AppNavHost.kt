@@ -20,6 +20,8 @@ import com.example.movilog.ui.CustomLists.CustomListDetailScreen
 import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.stats.StatsScreen
 import com.example.movilog.ui.popular.PopularMoviesScreen
+import com.example.movilog.ui.popular.UpcomingMoviesScreen
+
 
 
 
@@ -96,7 +98,8 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     onMovieClick = { movie ->
                         navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}")
                     },
-                    onSeeAllPopular = { navController.navigate(Routes.POPULAR_ALL) }
+                    onSeeAllPopular = { navController.navigate(Routes.POPULAR_ALL) },
+                    onSeeAllUpcoming = { navController.navigate(Routes.UPCOMING_ALL) }
                 )
             }
 
@@ -107,6 +110,15 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     onMovieClick = { movie -> navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}") }
                 )
             }
+
+            composable(Routes.UPCOMING_ALL) {
+                UpcomingMoviesScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onMovieClick = { movie -> navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}") }
+                )
+            }
+
 
 
             composable(Routes.WATCHLIST) {
