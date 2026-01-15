@@ -179,8 +179,11 @@ private fun PosterRow(movies: List<Movie>, onMovieClick: (Int) -> Unit) {
         return
     }
 
+    // Limit the list to 10 items before passing it to items()
+    val limitedMovies = movies.take(10)
+
     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        items(movies) { movie ->
+        items(limitedMovies) { movie ->
             val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" }
             Card(
                 shape = RoundedCornerShape(16.dp),

@@ -65,7 +65,7 @@ fun BrowseScreen(
             ) {
                 // Placeholder for your Logo
                 Image(
-                    painter = painterResource(id = R.drawable.logo), // Replace with R.drawable.logo
+                    painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo",
                     modifier = Modifier.size(40.dp)
                 )
@@ -74,7 +74,7 @@ fun BrowseScreen(
                     text = "Movilog",
                     color = Color.White,
                     fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold, // Use your Akhand-like font here
+                    fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineMedium
                 )
             }

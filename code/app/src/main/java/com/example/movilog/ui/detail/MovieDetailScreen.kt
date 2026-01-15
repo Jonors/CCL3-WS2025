@@ -252,16 +252,6 @@ private fun HeroCard(
 
                 Spacer(Modifier.height(6.dp))
 
-                Text(
-                    text = "Directed by …",
-                    color = Color.White.copy(alpha = 0.75f),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Studios …",
-                    color = Color.White.copy(alpha = 0.6f),
-                    style = MaterialTheme.typography.bodySmall
-                )
 
                 Spacer(Modifier.height(12.dp))
 

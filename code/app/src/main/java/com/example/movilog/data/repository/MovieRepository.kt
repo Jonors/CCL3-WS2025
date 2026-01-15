@@ -7,12 +7,20 @@ import com.example.movilog.data.model.Movie
 import com.example.movilog.data.model.MovieListCrossRef
 import com.example.movilog.data.remote.TmdbApiService
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class MovieRepository(
     private val movieDao: MovieDao,
     private val apiService: TmdbApiService
 ) {
-    // remote
+
+    private val today: String
+        get() = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+
+    private val twoMonthsAgo: String
+        get() = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_DATE)
+
     suspend fun fetchPopularMovies(token: String) = apiService.getPopularMovies(token)
     suspend fun searchMovies(token: String, query: String) = apiService.searchMovies(token, query)
     suspend fun fetchMovieDetails(token: String, movieId: Int) = apiService.getMovieDetails(token, movieId)
@@ -30,10 +38,14 @@ class MovieRepository(
     suspend fun getMovieById(movieId: Int) = movieDao.getMovieById(movieId)
 
     suspend fun fetchNowPlayingMovies(token: String) =
-        apiService.getNowPlayingMovies(token)
+        apiService.getNowPlayingMovies(token, twoMonthsAgo, today)
 
-    suspend fun fetchUpcomingMovies(token: String) =
-        apiService.getUpcomingMovies(token)
+
+    suspend fun fetchUpcomingMovies(token: String, region: String = "DE") =
+        apiService.getUpcomingMovies(
+            token = token,
+            startDate = today // Filters out movies already released
+        )
 
     // Fetch all lists (simple list for the selection dialog)
     fun getAllCustomLists(): Flow<List<CustomList>> = movieDao.getAllCustomLists()
