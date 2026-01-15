@@ -43,6 +43,7 @@ fun MyListsScreen(
     viewModel: MovieViewModel,
     onMovieClick: (Int) -> Unit,
     onListClick: (Long) -> Unit,
+    onSeeAllWatched: () -> Unit
 ) {
     val watched by viewModel.watchedList.collectAsState(initial = emptyList())
     val customCollections by viewModel.customCollections.collectAsState()
@@ -115,8 +116,10 @@ fun MyListsScreen(
                         movies = watched,
                         onMovieClick = onMovieClick,
                         onDeleteList = {},
-                        onRemoveMovie = { _, _ -> }
+                        onRemoveMovie = { _, _ -> },
+                        onSeeAll = { onSeeAllWatched() } // <-- Callback
                     )
+
                 }
 
                 // 2. Add New List Placeholder (Edit Mode only)
@@ -187,7 +190,8 @@ private fun Section(
     movies: List<Movie>,
     onMovieClick: (Int) -> Unit,
     onDeleteList: (Long) -> Unit,
-    onRemoveMovie: (Long, Int) -> Unit
+    onRemoveMovie: (Long, Int) -> Unit,
+    onSeeAll: (() -> Unit)? = null
 ) {
     Column {
         Row(
@@ -196,20 +200,46 @@ private fun Section(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(title, color = Color.White, style = MaterialTheme.typography.titleMedium)
-            if (listId != null) {
-                IconButton(onClick = { onDeleteList(listId) }) {
-                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
+
+            // ✅ rechts: See all (optional) + Delete (optional)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                if (onSeeAll != null) {
+                    Text(
+                        text = "See all",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                        ),
+                        modifier = Modifier
+                            .clickable { onSeeAll() }
+                            .padding(end = 10.dp)
+                    )
+                }
+
+                if (listId != null) {
+                    IconButton(onClick = { onDeleteList(listId) }) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = Color.Red.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
         }
+
         Spacer(Modifier.height(10.dp))
+
         if (movies.isEmpty()) {
             Text("No movies yet.", color = Color.White.copy(alpha = 0.5f))
         } else {
+            // ✅ bleibt EXACT gleich
             PosterRow(listId, movies, onMovieClick, onRemoveMovie)
         }
     }
 }
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

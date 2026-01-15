@@ -20,41 +20,21 @@ import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.MovieViewModel
 
-enum class SeeAllCategory(val key: String, val title: String) {
-    POPULAR("popular", "Popular Movies"),
-    UPCOMING("upcoming", "Upcoming Movies"),
-    NOW_PLAYING("now_playing", "New Movies"),
-    TOP_RATED("top_rated", "Top Rated"),
-
-}
-
-fun parseCategory(key: String?): SeeAllCategory =
-    SeeAllCategory.entries.firstOrNull { it.key == key } ?: SeeAllCategory.POPULAR
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SeeAllMoviesScreen(
+fun WatchedAllScreen(
     viewModel: MovieViewModel,
-    category: SeeAllCategory,
     onBack: () -> Unit,
-    onMovieClick: (Movie) -> Unit
+    onMovieClick: (Int) -> Unit
 ) {
-    val bg = Color(0xFF00121D)
-
-    // ✅ pick the right list
-    val movies by when (category) {
-        SeeAllCategory.POPULAR -> viewModel.popularMovies.collectAsState()
-        SeeAllCategory.UPCOMING -> viewModel.upcomingMovies.collectAsState()
-        SeeAllCategory.NOW_PLAYING -> viewModel.nowPlayingMovies.collectAsState()
-        SeeAllCategory.TOP_RATED -> viewModel.topRatedMovies.collectAsState()
-    }
-
+    val watched by viewModel.watchedList.collectAsState(initial = emptyList())
+    val bg = Color(0xFF0B2A36)
 
     Scaffold(
         containerColor = bg,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(category.title, color = Color.White) },
+                title = { Text("Watched list", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
@@ -72,28 +52,28 @@ fun SeeAllMoviesScreen(
             columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)               // ✅ safe under TopBar + BottomBar
+                .padding(padding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 90.dp),
+            contentPadding = PaddingValues(bottom = 90.dp, top = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(movies, key = { it.id }) { movie ->
-                GridMovieCard(movie = movie, onClick = onMovieClick)
+            items(watched, key = { it.id }) { movie ->
+                WatchedGridMovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
             }
         }
     }
 }
 
 @Composable
-private fun GridMovieCard(
+private fun WatchedGridMovieCard(
     movie: Movie,
-    onClick: (Movie) -> Unit
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(movie) }
+            .clickable { onClick() }
     ) {
         val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
 
@@ -109,8 +89,10 @@ private fun GridMovieCard(
 
         Spacer(Modifier.height(6.dp))
 
+        // optional: rating anzeigen (User rating)
+        val r = movie.userRating
         Text(
-            text = movie.title,
+            text = if (r != null && r > 0f) "${movie.title}  •  ${String.format("%.1f", r)}★" else movie.title,
             color = Color.White,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
