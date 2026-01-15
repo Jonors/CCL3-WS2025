@@ -22,6 +22,8 @@ import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.stats.StatsScreen
 import com.example.movilog.ui.seeall.SeeAllMoviesScreen
 import com.example.movilog.ui.seeall.parseCategory
+import com.example.movilog.ui.seeall.WatchedAllScreen
+
 
 
 
@@ -106,6 +108,16 @@ fun AppNavHost(viewModel: MovieViewModel) {
                 )
 
             }
+            composable(Routes.WATCHED_ALL) {
+                WatchedAllScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onMovieClick = { movieId ->
+                        navController.navigate("${Routes.MOVIE_DETAIL}/$movieId")
+                    }
+                )
+            }
+
 
             composable(
                 route = "${Routes.SEE_ALL}/{category}",
@@ -123,6 +135,7 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     }
                 )
             }
+
 
 
 
@@ -144,7 +157,9 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     },
                     onListClick = { listId ->
                         navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$listId")
-                    }
+                    },
+                    onSeeAllWatched = { navController.navigate(Routes.WATCHED_ALL) }
+
                 )
             }
 

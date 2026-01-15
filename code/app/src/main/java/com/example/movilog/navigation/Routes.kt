@@ -7,6 +7,8 @@ object Routes {
 
     const val SEE_ALL = "see_all"
 
+    const val WATCHED_ALL = "watched_all"
+
     const val WATCHLIST = "watchlist"
     const val MY_LISTS = "mylists"
     const val STATS = "stats"
