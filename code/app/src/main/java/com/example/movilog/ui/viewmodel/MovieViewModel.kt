@@ -343,17 +343,25 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // 2. Function to add movie to a list
-    fun addMovieToList(movieId: Int, listId: Long) {
-        viewModelScope.launch {
-            repository.addMovieToCustomList(movieId, listId)
-        }
+    suspend fun addMovieToListAndGetId(movieId: Int, listId: Long): Long {
+        repository.addMovieToCustomList(movieId, listId)
+        return listId
     }
 
     // 3. Function to create a new list
-    fun createNewList(name: String) {
-        viewModelScope.launch {
-            repository.createCustomList(name)
-        }
+    suspend fun createListAndAddMovie(name: String, movieId: Int): Long {
+        // 1. Create the list and get the new ID back
+        val newListId = repository.createCustomList(name)
+
+        // 2. Associate the movie with this new list
+        repository.addMovieToCustomList(movieId, newListId)
+
+        return newListId
+    }
+
+    suspend fun addMovieToExistingList(movieId: Int, listId: Long): Long {
+        repository.addMovieToCustomList(movieId, listId)
+        return listId
     }
 
     // Observe all custom collections with their associated movies
