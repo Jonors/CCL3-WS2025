@@ -85,9 +85,17 @@ dependencies {
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:2.6.1") {
+        exclude(group = "com.intellij", module = "annotations")
+    }
     implementation("androidx.compose.material:material-icons-extended")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains:annotations:23.0.0")
+    }
 }

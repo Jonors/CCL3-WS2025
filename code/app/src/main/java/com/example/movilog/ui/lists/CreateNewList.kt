@@ -1,4 +1,4 @@
-package com.example.movilog.ui.detail
+package com.example.movilog.ui.lists
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,23 +34,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.movilog.data.model.CustomList
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddToListDialog(
-    availableLists: List<CustomList>,
+fun CreateNewList(
     onDismiss: () -> Unit,
-    onListSelected: (Long) -> Unit,
     onCreateNewList: (String) -> Unit
-) {
+){
     var newListName by remember { mutableStateOf("") }
 
-
+    // Theme constants used in your Detail Screen
     val bg = Color(0xFF0B2A36)
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
     val accent = Color(0xFFF2B400)
+
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -65,19 +63,6 @@ fun AddToListDialog(
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // List existing lists
-                if (availableLists.isEmpty()) {
-                    Text(
-                        "No lists created yet.",
-                        color = Color.White.copy(alpha = 0.6f),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        color = Color.White.copy(alpha = 0.1f)
-                    )
-
                     // Create New List field
                     OutlinedTextField(
                         value = newListName,
@@ -107,40 +92,12 @@ fun AddToListDialog(
                         colors = ButtonDefaults.buttonColors(containerColor = accent),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Create & Add", color = Color.Black)
-                    }
-                } else {
-                    LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
-                        items(availableLists) { list ->
-                            TextButton(
-                                onClick = { onListSelected(list.listId) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp),
-                                colors = ButtonDefaults.textButtonColors(contentColor = accent)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Start
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(12.dp))
-                                    Text(list.listName, style = MaterialTheme.typography.bodyLarge)
-                                }
-                            }
-                        }
+                        Text("Create", color = Color.Black)
                     }
                 }
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = Color.White.copy(alpha = 0.1f)
-                )
+            Spacer(Modifier.height(12.dp))
 
-
-                Spacer(Modifier.height(12.dp))
-
-            }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {

@@ -378,6 +378,11 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         }
     }
 
+    suspend fun createCustomList(name: String):Long{
+        val newListId = repository.createCustomList(name)
+        return newListId
+    }
+
     fun deleteCustomList(listId: Long) {
         viewModelScope.launch {
             repository.deleteCustomList(listId)

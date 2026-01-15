@@ -47,7 +47,7 @@ fun BrowseScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF00121D) // Deep Navy Background from screenshot
+        color = Color(0xFF0B2A36) // Deep Navy Background from screenshot
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // --- HEADER ---
