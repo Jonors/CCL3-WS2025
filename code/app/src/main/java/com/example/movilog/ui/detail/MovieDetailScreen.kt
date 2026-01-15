@@ -15,23 +15,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController // ✅ Added Import
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.CustomList
 import com.example.movilog.data.remote.MovieDetailsDto
+import com.example.movilog.navigation.Routes
 import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.RatingsCard
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(
     movieId: Int,
     viewModel: MovieViewModel,
+    navController: NavController, // ✅ Added NavController parameter
     onBack: () -> Unit = {}
 ) {
     LaunchedEffect(movieId) { viewModel.loadMovieDetails(movieId) }
 
     val state by viewModel.detailState.collectAsState()
-    val customLists by viewModel.customLists.collectAsState()
+    // ✅ Changed name to availableLists to fix unresolved reference below
+    val availableLists by viewModel.customLists.collectAsState()
+
+    val scope = rememberCoroutineScope()
 
     var showWatchedDialog by remember { mutableStateOf(false) }
     var showAddToListDialog by remember { mutableStateOf(false) }
@@ -89,7 +96,7 @@ fun MovieDetailScreen(
                                         ) {
                                             Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
                                             Spacer(Modifier.width(8.dp))
-                                            Text("Add to Collection", color = Color.Black)
+                                            Text("Add to List", color = Color.Black)
                                         }
                                     }
                                     state.inWatchlist -> {
@@ -158,21 +165,33 @@ fun MovieDetailScreen(
 
         if (showAddToListDialog) {
             AddToListDialog(
-                availableLists = customLists,
+                availableLists = availableLists,
                 onDismiss = { showAddToListDialog = false },
                 onListSelected = { listId ->
-                    viewModel.addMovieToList(movieId, listId)
-                    showAddToListDialog = false
+                    scope.launch {
+                        // Wait for the movie to be added
+                        viewModel.addMovieToExistingList(movieId, listId)
+                        // Navigate once finished
+                        navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$listId")
+                        showAddToListDialog = false
+                    }
                 },
                 onCreateNewList = { name ->
-                    viewModel.createNewList(name)
+                    scope.launch {
+                        // Wait for list creation AND movie addition
+                        val newListId = viewModel.createListAndAddMovie(name, movieId)
+                        // Navigate to the specific new list
+                        navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$newListId")
+                        showAddToListDialog = false
+                    }
                 }
             )
         }
     }
 }
 
-// Helper components (HeroCard, InfoChip, etc) stay the same as your original code...
+
+// ... rest of HeroCard, InfoChip, and formatRuntime functions remain the same
 
 
 @Composable
@@ -271,113 +290,7 @@ private fun InfoChip(label: String) {
     }
 }
 
-// New File: com.example.movilog.ui.detail.AddToListDialog.kt
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddToListDialog(
-    availableLists: List<CustomList>,
-    onDismiss: () -> Unit,
-    onListSelected: (Long) -> Unit,
-    onCreateNewList: (String) -> Unit
-) {
-    var newListName by remember { mutableStateOf("") }
-
-    // Theme constants used in your Detail Screen
-    val bg = Color(0xFF0B2A36)
-    val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
-    val accent = Color(0xFFF2B400)
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = bg, // Matches page background
-        shape = RoundedCornerShape(24.dp), // Matches HeroCard shape
-        title = {
-            Text(
-                "Add to Custom List",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineSmall
-            )
-        },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // List existing lists
-                if (availableLists.isEmpty()) {
-                    Text(
-                        "No lists created yet.",
-                        color = Color.White.copy(alpha = 0.6f),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                } else {
-                    LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
-                        items(availableLists) { list ->
-                            TextButton(
-                                onClick = { onListSelected(list.listId) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp),
-                                colors = ButtonDefaults.textButtonColors(contentColor = accent)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Start
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(12.dp))
-                                    Text(list.listName, style = MaterialTheme.typography.bodyLarge)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = Color.White.copy(alpha = 0.1f)
-                )
-
-                // Create New List field
-                OutlinedTextField(
-                    value = newListName,
-                    onValueChange = { newListName = it },
-                    label = { Text("New List Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedLabelColor = accent,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
-                        focusedBorderColor = accent,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        cursorColor = accent
-                    )
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        if (newListName.isNotBlank()) {
-                            onCreateNewList(newListName)
-                            newListName = ""
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = accent),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Create & Add", color = Color.Black)
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close", color = Color.White.copy(alpha = 0.7f))
-            }
-        }
-    )
-}
 private fun formatRuntime(runtimeMinutes: Int?): String {
     if (runtimeMinutes == null || runtimeMinutes <= 0) return "—"
     val h = runtimeMinutes / 60

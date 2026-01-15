@@ -46,8 +46,8 @@ class MovieRepository(
     }
 
     // Create a new list (e.g., "Old but Gold")
-    suspend fun createCustomList(name: String) {
-        movieDao.createCustomList(CustomList(listName = name))
+    suspend fun createCustomList(name: String): Long {
+        return movieDao.createCustomList(CustomList(listName = name))
     }
 
     fun observeMovieById(movieId: Int) = movieDao.observeMovieById(movieId)

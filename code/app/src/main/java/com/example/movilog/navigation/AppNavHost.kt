@@ -50,7 +50,7 @@ fun AppNavHost(viewModel: MovieViewModel) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
-                                restoreState = true
+                                restoreState = false
                             }
                         },
                         icon = {
@@ -134,6 +134,7 @@ fun AppNavHost(viewModel: MovieViewModel) {
                 MovieDetailScreen(
                     movieId = movieId,
                     viewModel = viewModel,
+                    navController = navController, // ✅ Pass the navController here
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -143,7 +144,6 @@ fun AppNavHost(viewModel: MovieViewModel) {
                     onMovieClick = { id ->
                         navController.navigate("${Routes.MOVIE_DETAIL}/$id")
                     },
-                    // NEW CALLBACK: Navigate to the folder detail view
                     onListClick = { listId ->
                         navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$listId")
                     }
