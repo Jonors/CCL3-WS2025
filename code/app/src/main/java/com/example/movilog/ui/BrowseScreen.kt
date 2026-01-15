@@ -37,8 +37,11 @@ fun BrowseScreen(
     viewModel: MovieViewModel,
     onMovieClick: (Movie) -> Unit = {},
     onSeeAllPopular: () -> Unit = {},
-    onSeeAllUpcoming: () -> Unit = {}
-) {
+    onSeeAllUpcoming: () -> Unit = {},
+    onSeeAllNowPlaying: () -> Unit = {},
+    onSeeAllTopRated: () -> Unit = {}
+)
+ {
     val query by viewModel.query.collectAsState()
     val popular by viewModel.popularMovies.collectAsState()
     val upcoming by viewModel.upcomingMovies.collectAsState()
@@ -123,8 +126,9 @@ fun BrowseScreen(
                 } else {
                     MovieSection("Popular Movies", popular, onMovieClick, onSeeAll = onSeeAllPopular)
                     MovieSection("Upcoming Movies", upcoming, onMovieClick, onSeeAll = onSeeAllUpcoming)
-                    MovieSection("New Movies", nowPlaying, onMovieClick)
-                    MovieSection("Top Rated", topRated, onMovieClick)
+                    MovieSection("New Movies", nowPlaying, onMovieClick, onSeeAll = onSeeAllNowPlaying)
+                    MovieSection("Top Rated", topRated, onMovieClick, onSeeAll = onSeeAllTopRated)
+
                 }
 
                 Spacer(Modifier.height(80.dp))

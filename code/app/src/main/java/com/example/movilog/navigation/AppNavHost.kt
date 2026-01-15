@@ -20,8 +20,9 @@ import androidx.navigation.NavController
 import com.example.movilog.ui.CustomLists.CustomListDetailScreen
 import com.example.movilog.ui.MovieViewModel
 import com.example.movilog.ui.stats.StatsScreen
-import com.example.movilog.ui.popular.PopularMoviesScreen
-import com.example.movilog.ui.popular.UpcomingMoviesScreen
+import com.example.movilog.ui.seeall.SeeAllMoviesScreen
+import com.example.movilog.ui.seeall.parseCategory
+
 
 
 
@@ -96,27 +97,30 @@ fun AppNavHost(viewModel: MovieViewModel) {
             composable(Routes.BROWSE) {
                 BrowseScreen(
                     viewModel = viewModel,
+                    onMovieClick = { movie -> navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}") },
+
+                    onSeeAllPopular = { navController.navigate("${Routes.SEE_ALL}/popular") },
+                    onSeeAllUpcoming = { navController.navigate("${Routes.SEE_ALL}/upcoming") },
+                    onSeeAllNowPlaying = { navController.navigate("${Routes.SEE_ALL}/now_playing") },
+                    onSeeAllTopRated = { navController.navigate("${Routes.SEE_ALL}/top_rated") }
+                )
+
+            }
+
+            composable(
+                route = "${Routes.SEE_ALL}/{category}",
+                arguments = listOf(navArgument("category") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val key = backStackEntry.arguments?.getString("category")
+                val category = parseCategory(key)
+
+                SeeAllMoviesScreen(
+                    viewModel = viewModel,
+                    category = category,
+                    onBack = { navController.popBackStack() },
                     onMovieClick = { movie ->
                         navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}")
-                    },
-                    onSeeAllPopular = { navController.navigate(Routes.POPULAR_ALL) },
-                    onSeeAllUpcoming = { navController.navigate(Routes.UPCOMING_ALL) }
-                )
-            }
-
-            composable(Routes.POPULAR_ALL) {
-                PopularMoviesScreen(
-                    viewModel = viewModel,
-                    onBack = { navController.popBackStack() },
-                    onMovieClick = { movie -> navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}") }
-                )
-            }
-
-            composable(Routes.UPCOMING_ALL) {
-                UpcomingMoviesScreen(
-                    viewModel = viewModel,
-                    onBack = { navController.popBackStack() },
-                    onMovieClick = { movie -> navController.navigate("${Routes.MOVIE_DETAIL}/${movie.id}") }
+                    }
                 )
             }
 

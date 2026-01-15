@@ -1,4 +1,4 @@
-package com.example.movilog.ui.popular
+package com.example.movilog.ui.seeall
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,21 +20,39 @@ import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.MovieViewModel
 
+enum class SeeAllCategory(val key: String, val title: String) {
+    POPULAR("popular", "Popular Movies"),
+    UPCOMING("upcoming", "Upcoming Movies"),
+    NOW_PLAYING("now_playing", "New Movies"),
+    TOP_RATED("top_rated", "Top Rated")
+}
+
+fun parseCategory(key: String?): SeeAllCategory =
+    SeeAllCategory.entries.firstOrNull { it.key == key } ?: SeeAllCategory.POPULAR
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PopularMoviesScreen(
+fun SeeAllMoviesScreen(
     viewModel: MovieViewModel,
+    category: SeeAllCategory,
     onBack: () -> Unit,
     onMovieClick: (Movie) -> Unit
 ) {
-    val popular by viewModel.popularMovies.collectAsState()
     val bg = Color(0xFF00121D)
+
+    // ✅ pick the right list
+    val movies by when (category) {
+        SeeAllCategory.POPULAR -> viewModel.popularMovies.collectAsState()
+        SeeAllCategory.UPCOMING -> viewModel.upcomingMovies.collectAsState()
+        SeeAllCategory.NOW_PLAYING -> viewModel.nowPlayingMovies.collectAsState()
+        SeeAllCategory.TOP_RATED -> viewModel.topRatedMovies.collectAsState()
+    }
 
     Scaffold(
         containerColor = bg,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Popular Movies", color = Color.White) },
+                title = { Text(category.title, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
@@ -52,18 +70,15 @@ fun PopularMoviesScreen(
             columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)              // ✅ TopBar + NavBar safe
-                .padding(horizontal = 16.dp), // ✅ Seitenabstand
-            contentPadding = PaddingValues(
-                bottom = 90.dp               // ✅ Abstand zur BottomNav
-            ),
+                .padding(padding)               // ✅ safe under TopBar + BottomBar
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 90.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(popular, key = { it.id }) { movie ->
+            items(movies, key = { it.id }) { movie ->
                 GridMovieCard(movie = movie, onClick = onMovieClick)
             }
-
         }
     }
 }
