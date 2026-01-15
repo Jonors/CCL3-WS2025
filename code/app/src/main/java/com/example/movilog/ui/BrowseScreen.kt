@@ -26,6 +26,7 @@ import com.example.movilog.ui.theme.TextSecondary
 import com.example.movilog.ui.theme.TextWhite
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.ui.text.style.TextOverflow
 
@@ -34,7 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun BrowseScreen(
     viewModel: MovieViewModel,
-    onMovieClick: (Movie) -> Unit = {}
+    onMovieClick: (Movie) -> Unit = {},
+    onSeeAllPopular: () -> Unit = {},
+    onSeeAllUpcoming: () -> Unit = {}
 ) {
     val query by viewModel.query.collectAsState()
     val popular by viewModel.popularMovies.collectAsState()
@@ -116,14 +119,15 @@ fun BrowseScreen(
                         movies = searchResults,
                         onMovieClick = onMovieClick
                     )
+                    Spacer(Modifier.height(30.dp))
                 } else {
-                    MovieSection("Popular Movies", popular, onMovieClick)
-                    MovieSection("Upcoming Movies", upcoming, onMovieClick)
+                    MovieSection("Popular Movies", popular, onMovieClick, onSeeAll = onSeeAllPopular)
+                    MovieSection("Upcoming Movies", upcoming, onMovieClick, onSeeAll = onSeeAllUpcoming)
                     MovieSection("New Movies", nowPlaying, onMovieClick)
                     MovieSection("Top Rated", topRated, onMovieClick)
                 }
 
-                Spacer(Modifier.height(80.dp)) // Bottom padding for navigation
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
@@ -133,18 +137,39 @@ fun BrowseScreen(
 private fun MovieSection(
     title: String,
     movies: List<Movie>,
-    onMovieClick: (Movie) -> Unit
+    onMovieClick: (Movie) -> Unit,
+    onSeeAll: (() -> Unit)? = null
 ) {
     if (movies.isEmpty()) return
 
     Column(modifier = Modifier.padding(bottom = 24.dp)) {
-        Text(
-            text = title,
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (onSeeAll != null) {
+                Text(
+                    text = "See all",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    modifier = Modifier
+                        .clickable { onSeeAll() }
+                        .padding(start = 8.dp)
+                )
+            }
+        }
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -210,9 +235,6 @@ private fun SearchResultsGrid(
             return
         }
 
-        // ✅ Grid inside scroll container:
-        // IMPORTANT: since your outer content is verticalScroll(),
-        // we disable grid's own scrolling and let the parent scroll.
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             modifier = Modifier
