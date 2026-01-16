@@ -101,7 +101,7 @@ header h1 {
     padding-top: 20px;
 }
 
-.grid-info h3 {
+    h3 {
     color: var(--accent);
     font-size: 1rem;
 }
@@ -148,6 +148,19 @@ header h1 {
     align-items: center;
     justify-content: center;
 }
+
+/* Targeting the table in the Tech Stack section */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* This adds vertical space between rows */
+}
+
+th, td {
+    padding: 5px 10px; /* This adds space inside each cell */
+    text-align: left;
+}
+
 
 .step-content {
     background: var(--card-bg);
