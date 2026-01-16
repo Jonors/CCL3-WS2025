@@ -75,7 +75,11 @@ header h1 {
     font-size: 1.1rem;
 }
 
-
+.legend{
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+}
 
 .container {
     max-width: 1000px;
@@ -201,6 +205,16 @@ th, td {
     transition: all 0.3s ease;
 }
 
+
+
+footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+}
+
 @media (max-width: 1024px) {
     .flow-step {
         flex: 0 1 calc(50% - 20px);
@@ -212,17 +226,6 @@ th, td {
         flex: 0 1 100%;
     }
 }
-
-
-footer {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    border-top: 1px solid var(--border-color);
-}
-
-
 
 @media (max-width: 600px) {
     .grid-info {
