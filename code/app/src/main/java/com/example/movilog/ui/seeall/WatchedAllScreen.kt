@@ -1,15 +1,16 @@
 package com.example.movilog.ui.seeall
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.MovieViewModel
+import com.example.movilog.ui.components.DeleteConfirmationDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +30,12 @@ fun WatchedAllScreen(
     onMovieClick: (Int) -> Unit
 ) {
     val watched by viewModel.watchedList.collectAsState(initial = emptyList())
+
+    var isEditMode by remember { mutableStateOf(false) }
+    var movieToRemoveId by remember { mutableStateOf<Int?>(null) }
+
     val bg = Color(0xFF0B2A36)
+    val accent = Color(0xFFF2B400)
 
     Scaffold(
         containerColor = bg,
@@ -40,63 +47,135 @@ fun WatchedAllScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = bg,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                actions = {
+                    IconButton(
+                        onClick = { isEditMode = !isEditMode },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (isEditMode) accent else Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isEditMode) Icons.Default.Done else Icons.Default.Edit,
+                            contentDescription = "Toggle Edit Mode",
+                            tint = if (isEditMode) Color.Black else Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = bg)
             )
         }
     ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 90.dp, top = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(watched, key = { it.id }) { movie ->
-                WatchedGridMovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
+        Box(modifier = Modifier.padding(padding)) {
+            if (watched.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No watched movies yet.", color = Color.White.copy(alpha = 0.6f))
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    items(
+                        items = watched,
+                        key = { it.id }
+                    ) { movie ->
+                        WatchedMovieRow(
+                            movie = movie,
+                            isEditMode = isEditMode,
+                            onOpen = {
+                                if (!isEditMode) onMovieClick(movie.id)
+                            },
+                            onDeleteClick = { movieToRemoveId = movie.id }
+                        )
+                    }
+                }
+            }
+
+            if (movieToRemoveId != null) {
+                val id = movieToRemoveId!!
+                DeleteConfirmationDialog(
+                    title = "Remove Movie?",
+                    text = "Remove this movie from your watched list?",
+                    onDismiss = { movieToRemoveId = null },
+                    onConfirm = {
+                        // ✅ simplest: delete row (removes from watched list + stats)
+                        viewModel.deleteMovie(id)
+
+                        // Optional alternative (wenn du später "unwatch" willst statt delete):
+                        // viewModel.unwatchMovie(id)
+
+                        movieToRemoveId = null
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun WatchedGridMovieCard(
+private fun WatchedMovieRow(
     movie: Movie,
-    onClick: () -> Unit
+    isEditMode: Boolean,
+    onOpen: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
+    val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
+    val deleteRed = Color(0xFFE85B5B)
+    val accent = Color(0xFFF2B400)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
+        onClick = onOpen
     ) {
-        val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val posterUrl = movie.posterPath?.let { "https://image.tmdb.org/t/p/w185$it" }
+            AsyncImage(
+                model = posterUrl,
+                contentDescription = movie.title,
+                modifier = Modifier
+                    .size(width = 54.dp, height = 80.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
 
-        AsyncImage(
-            model = posterUrl,
-            contentDescription = movie.title,
-            modifier = Modifier
-                .aspectRatio(2f / 3f)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp)),
-            contentScale = ContentScale.Crop
-        )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = movie.title,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
+                )
 
-        Spacer(Modifier.height(6.dp))
+                val r = movie.userRating
+                if (r != null && r > 0f) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = "${String.format("%.1f", r)} ★",
+                        color = accent,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
 
-        // optional: rating anzeigen (User rating)
-        val r = movie.userRating
-        Text(
-            text = if (r != null && r > 0f) "${movie.title}  •  ${String.format("%.1f", r)}★" else movie.title,
-            color = Color.White,
-            style = MaterialTheme.typography.bodySmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+            if (isEditMode) {
+                Button(
+                    onClick = onDeleteClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = deleteRed),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text("Delete", style = MaterialTheme.typography.labelMedium, color = Color.White)
+                }
+            }
+        }
     }
 }
