@@ -135,15 +135,16 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
     private fun searchMovies(q: String) {
         viewModelScope.launch {
             try {
-                val response = repository.searchMovies(token, q)
-                _searchResults.value = response.results
-                Log.d("TMDB", "Search '$q': ${response.results.size}")
+                val results = repository.searchMoviesFiltered(token, q)
+                _searchResults.value = results
+                Log.d("TMDB", "Search '$q': ${results.size} (filtered)")
             } catch (e: Exception) {
                 _searchResults.value = emptyList()
                 Log.e("TMDB", "Failed to search movies", e)
             }
         }
     }
+
 
     data class MovieDetailUiState(
         val isLoading: Boolean = true,

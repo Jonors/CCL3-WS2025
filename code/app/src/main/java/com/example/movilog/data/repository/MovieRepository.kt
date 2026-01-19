@@ -6,14 +6,16 @@ import com.example.movilog.data.model.ListWithMovies
 import com.example.movilog.data.model.Movie
 import com.example.movilog.data.model.MovieListCrossRef
 import com.example.movilog.data.remote.TmdbApiService
+import com.example.movilog.data.remote.TmdbResponse
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class MovieRepository(
     private val movieDao: MovieDao,
-    private val apiService: TmdbApiService
+    private val apiService: TmdbApiService,
 ) {
+
 
     private val today: String
         get() = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
@@ -40,12 +42,60 @@ class MovieRepository(
     suspend fun fetchNowPlayingMovies(token: String) =
         apiService.getNowPlayingMovies(token, twoMonthsAgo, today)
 
+    private fun hasPoster(movie: Movie): Boolean {
+        return !movie.posterPath.isNullOrBlank()
+    }
 
-    suspend fun fetchUpcomingMovies(token: String, region: String = "DE") =
-        apiService.getUpcomingMovies(
+    companion object {
+        private const val MIN_VOTE_COUNT = 100
+    }
+
+
+    private fun isGoodSearchResult(m: Movie): Boolean {
+        val voteCountOk = (m.voteCount ?: 0) >= MIN_VOTE_COUNT
+        return voteCountOk
+    }
+
+    suspend fun searchMoviesFiltered(
+        token: String,
+        query: String,
+        targetResults: Int = 20,
+        maxPages: Int = 5
+    ): List<Movie> {
+        val collected = mutableListOf<Movie>()
+        var page = 1
+
+        while (page <= maxPages && collected.size < targetResults) {
+            val res = apiService.searchMovies(
+                token = token,
+                query = query,
+                page = page
+            )
+
+            val goodOnThisPage = res.results.filter { isGoodSearchResult(it) }
+            collected += goodOnThisPage
+
+            page++
+            // optional: wenn TMDB eine Seite ohne Ergebnisse liefert, abbrechen
+            if (res.results.isEmpty()) break
+        }
+
+        // Du kannst auch deduplizieren, falls TMDB mal doppelt liefert:
+        return collected.distinctBy { it.id }.take(targetResults)
+    }
+
+
+    suspend fun fetchUpcomingMovies(token: String): TmdbResponse {
+        val response = apiService.getUpcomingMovies(
             token = token,
-            startDate = today // Filters out movies already released
+            startDate = today
         )
+
+        return response.copy(
+            results = response.results.filter { hasPoster(it) }
+        )
+    }
+
 
     // Fetch all lists (simple list for the selection dialog)
     fun getAllCustomLists(): Flow<List<CustomList>> = movieDao.getAllCustomLists()

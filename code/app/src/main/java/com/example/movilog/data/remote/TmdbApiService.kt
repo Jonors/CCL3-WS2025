@@ -41,8 +41,11 @@ interface TmdbApiService {
     suspend fun searchMovies(
         @Header("Authorization") token: String,
         @Query("query") query: String,
+        @Query("page") page: Int = 1,
+        @Query("include_adult") includeAdult: Boolean = false,
         @Header("accept") accept: String = "application/json"
     ): TmdbResponse
+
 
     @GET("movie/{movie_id}")
     suspend fun getMovieDetails(
