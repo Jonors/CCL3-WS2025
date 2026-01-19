@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoviLog - Documentation</title>
+    <title>MoviLog - Project Overview</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
 
 <header>
     <nav class="nav-bar">
-        <a href="index.html">User Flow</a>
+        <a href="index.html">Overview</a>
         <a href="documentation.html" class="active">Documentation</a>
+        <a href="userResearch.html" >User Research</a>
     </nav>
-    <div class="header-content">
+    <div class="header">
+        <img src="images/WatchlistAppLogo.png" alt="MoviLog Logo">
         <h1>MoviLog</h1>
-        <p class="subtitle">CCL Project — Paul Hitzl & Jona Zeichen</p>
+    </div>
+    <div>
+        <p class="subtitle">CCL3 Project — Paul Hitzl & Jona Zeichen</p>
     </div>
 </header>
 
@@ -23,14 +28,112 @@
 
     <section class="intro-card">
         <h2>Project Documentation</h2>
-        <h3> 10.01.2026</h3>
-       <p> Set up repository and pages </p>
+        <p>
+            MoviLog is a high performance Android application built with Kotlin and Jetpack Compose.
+            As 3rd year IT students, our goal was to create a tool for movie enthusiasts to discover,
+            track, and organize their cinematic journey. By leveraging the TMDB API and a local Room database,
+            MoviLog allows users to manage a personal watchlist, record watched movies with custom ratings,
+            and build curated collections.
+        </p>
 
+    <section class="content-section">
+        <h3>Core Features</h3>
+        <ul>
+            <li><strong>Real time Discovery:</strong> Browse Popular, Top Rated, Upcoming, and Now Playing films fetched directly from The Movie Database.</li>
+            <li><strong>Smart Search:</strong> Instant filtering of the global movie database to find specific titles.</li>
+            <li><strong>Comprehensive Tracking:</strong>
+                <ul>
+                    <li>Add movies you want to see to your watchlist</li>
+                    <li>Mark films as seen including the specific date and a personal 1 to 10 star rating.</li>
+                </ul>
+            </li>
+            <li><strong>Custom Collections</strong> Create and manage unique lists.</li>
+            <li><strong>Viewing Insights</strong> A dedicated statistics dashboard featuring a monthly activity map and top rated favorites.</li>
+        </ul>
+    </section>
+
+    <section class="content-section">
+        <h3>Technical Stack</h3>
+        <table>
+            <tbody>
+            <tr>
+                <td>Language</td>
+                <td>Kotlin</td>
+            </tr>
+            <tr>
+                <td>UI Framework</td>
+                <td>Jetpack Compose Declarative UI</td>
+            </tr>
+            <tr>
+                <td>Architecture</td>
+                <td>MVVM Model View ViewModel plus Repository Pattern</td>
+            </tr>
+            <tr>
+                <td>Networking</td>
+                <td>Retrofit 2 and OkHttp</td>
+            </tr>
+            <tr>
+                <td>Local Database</td>
+                <td>Room Persistence Library</td>
+            </tr>
+            <tr>
+                <td>Image Loading</td>
+                <td>Coil</td>
+            </tr>
+            <tr>
+                <td>Navigation</td>
+                <td>Jetpack Compose Navigation</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="content-section">
+        <h3>Setup and Installation</h3>
+        <p>To run MoviLog on your local machine, follow these steps:</p>
+        <ol>
+            <li><strong>Prerequisites</strong> Ensure you have Android Studio Ladybug or newer, JDK 11 plus, and an API Key from The Movie Database.</li>
+            <li><strong>Configure the API Token</strong> Open com.example.movilog.ui.MovieViewModel.kt and locate the token variable. Replace the placeholder string with your TMDB v4 Read Access Token.</li>
+            <li><strong>Build the Project</strong> Clone the repository, sync the project with Gradle files, and run the application on an emulator or physical device with Min SDK 24.</li>
+        </ol>
+    </section>
+
+    <section class="content-section">
+        <h3>System Architecture</h3>
+        <p>
+            MoviLog follows the MVVM pattern to ensure the UI remains reactive and the business logic is decoupled from the Android framework.
+        </p>
+
+
+
+        <h3>Data Layer</h3>
+        <ul>
+            <li>Remote:  TmdbApiService handles REST API calls to TMDB.</li>
+            <li>Local:  AppDatabase uses Room to store Movie entities and CustomList relationships.</li>
+            <li>Repository:  MovieRepository acts as the single source of truth mediating between network data and local persistence.</li>
+        </ul>
+
+        <h3>UI Layer</h3>
+        <ul>
+            <li>Navigation:  AppNavHost.kt manages the screen transitions and argument passing.</li>
+            <li>State Management:  MovieViewModel exposes StateFlow objects that the Compose UI observes to reflect data changes immediately.</li>
+        </ul>
+    </section>
+
+    <section class="content-section">
+        <h3>UI Colors</h3>
+        <ul>
+            <li>Background: Deep Navy #0B2A36</li>
+            <li>Accent: MoviLog Yellow #F2B400</li>
+            <li>Typography: Cinematic styling using the Oswald font family.</li>
+        </ul>
+    </section>
     </section>
 
 </main>
 
 <footer>
+    <p>This project is for educational purposes as part of the Creative Code Lab 3.</p>
     <p>&copy; 2026 MoviLog | Paul Hitzl & Jona Zeichen</p>
 </footer>
 

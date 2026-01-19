@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoviLog - Project Overview</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<header>
+    <nav class="nav-bar">
+        <a href="index.html">Overview</a>
+        <a href="documentation.html" >Documentation</a>
+        <a href="userResearch.html" class="active">User Research</a>
+    </nav>
+    <div class="header">
+        <img src="images/WatchlistAppLogo.png" alt="MoviLog Logo">
+        <h1>MoviLog</h1>
+    </div>
+    <div>
+        <p class="subtitle">CCL3 Project — Paul Hitzl & Jona Zeichen</p>
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="intro-card">
+        <h2>Usability Test Plan</h2>
+        <p>
+            This plan outlines the evaluation of the MoviLog Android application. By moving beyond simple instruction-based testing to <strong>goal-oriented scenarios</strong>, we aim to observe how naturally users interact with our movie management system.
+        </p>
+
+        <section class="content-section">
+
+            <h3>1. Heuristic Evaluation (Pre-Test)</h3>
+            <p>Prior to user testing, a team evaluation based on Nielsen’s 10 Heuristics identified the following areas of concern:</p>
+            <table>
+                <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Description</th>
+                    <th>Heuristic</th>
+                    <th>Severity</th>
+                    <th>Recommendation</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Navigation Flash</strong></td>
+                    <td>White screen flashes during screen transitions.</td>
+                    <td>1;8</td>
+                    <td>2</td>
+                    <td>Fix background color consistency.</td>
+                </tr>
+                <tr>
+                    <td><strong>Stats Icon</strong></td>
+                    <td>Stats Icon can be easily confused with a "Profile" or "User" icon.</td>
+                    <td>4;6</td>
+                    <td>2</td>
+                    <td>Redesign icon for clarity.</td>
+                </tr>
+                <tr>
+                    <td><strong>Filtering</strong></td>
+                    <td>Lack of genre/popularity filters makes browsing inefficient.</td>
+                    <td>7;3</td>
+                    <td>3</td>
+                    <td>Implement genre-based filtering.</td>
+                </tr>
+                <tr>
+                    <td><strong>Error Handling</strong></td>
+                    <td>No feedback during API connection failures.</td>
+                    <td>9;5</td>
+                    <td>4</td>
+                    <td>Add error pop-up and retry logic.</td>
+                </tr>
+                <tr>
+                    <td><strong>Heatmap Clarity</strong></td>
+                    <td>Visual data lacks labels and proper explaining.</td>
+                    <td>2;10</td>
+                    <td>2</td>
+                    <td>Add a button which opens a more detailed explanation</td>
+                </tr>
+                <tr>
+                    <td><strong>List Control</strong></td>
+                    <td>Cannot remove items from the "watched list".</td>
+                    <td>3</td>
+                    <td>3</td>
+                    <td>Add a "delete" function for "watched list" items.</td>
+                </tr>
+                </tbody>
+            </table>
+            <section class="legend">1: Visibility of System Status, 2: Match between System and the Real World,
+            3: User Control and Freedom, 4: Consistency and Standards, 5: Error Prevention, 6: Recognition Rather Than Recall,
+                7: Flexibility and Efficiency of Use, 8: Aesthetic and Minimalist Design, 9: Recognize, Diagnose and Recover from Errors,
+            10: Help and Documentation</section>
+
+            <h3>3. Hypotheses</h3>
+            <ul>
+                <li><strong>H1:</strong> Users can search for a movie and access details without assistance.</li>
+                <li><strong>H2:</strong> Users can create and manage movie lists efficiently.</li>
+                <li><strong>H3:</strong> Users can rate movies without confusion.</li>
+                <li><strong>H4:</strong> Users can navigate between the main sections of the interface without noticeable hesitation or navigation errors.</li>
+            </ul>
+
+            <h3>4. Study Design</h3>
+            <p><strong>Type:</strong> Descriptive usability study using a within-subjects design. <br>
+                <strong>Participants:</strong> 6–8 users aged 18–30.</p>
+
+            <h3>5. Tasks (Goal-Oriented Scenarios)</h3>
+            <p>To simulate real-world usage, participants are given the following goals:</p>
+
+            <div class="scenario-box">
+                <strong>Scenario 1: Discovery</strong><br>
+                "You just saw a trailer for the movie <em>'Inception'</em> and want to know more about it. Find it in the catalogue."
+            </div>
+
+            <div class="scenario-box">
+                <strong>Scenario 2: Detail Retrieval</strong><br>
+                "Now that you've found the movie, you want to know if you have time to watch it tonight. Find the duration (runtime) and the current user rating."
+            </div>
+
+            <div class="scenario-box">
+                <strong>Scenario 3: Organization</strong><br>
+                "You want to keep track of movies to watch on the weekend. Create a new personal list and name it <em>'Weekend Vibes'</em>."
+            </div>
+
+            <div class="scenario-box">
+                <strong>Scenario 4: Management</strong><br>
+                "Add <em>'Inception'</em> to your <em>'Weekend Vibes'</em> list. Later, you decide you're not in the mood for it—remove the movie from that list."
+            </div>
+
+            <div class="scenario-box">
+                <strong>Scenario 5: Statistics</strong><br>
+                "Navigate to your personal movie stats. Looking at the heatmap, explain to the moderator what you think the different colors represent."
+            </div>
+
+            <h3>6. Data Collection & Methods</h3>
+            <p>We utilize <strong>Moderated Testing</strong> with a <strong>Think-Aloud Protocol</strong>. Data collected includes:</p>
+            <ul>
+                <li><strong>Quantitative:</strong> Task success rate, completion time, and error frequency.</li>
+                <li><strong>Subjective:</strong> System Usability Scale (SUS) scores.</li>
+                <li><strong>Qualitative:</strong> Observation notes and post-task interview feedback.</li>
+            </ul>
+
+            <h3>7. Test Procedure</h3>
+            <ol>
+                <li><strong>Introduction:</strong> Briefing the participant on the app's purpose.</li>
+                <li><strong>Pilot Test:</strong> Ensuring task clarity with a single initial participant.</li>
+                <li><strong>Main Test:</strong> Execution of the 5 scenarios listed above.</li>
+                <li><strong>Debrief:</strong> Completion of the SUS questionnaire and closing questions.</li>
+            </ol>
+
+            <h3> Expected Outcomes</h3>
+            <p>The test aims to identify usability issues and validate heuristic findings.</p>
+        </section>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>This project is for educational purposes as part of the Creative Code Lab 3.</p>
+    <p>&copy; 2026 MoviLog | Paul Hitzl & Jona Zeichen</p>
+</footer>
+
+</body>
+</html>
