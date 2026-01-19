@@ -39,7 +39,7 @@ fun SeeAllMoviesScreen(
     onBack: () -> Unit,
     onMovieClick: (Movie) -> Unit
 ) {
-    val bg = Color(0xFF00121D)
+    val bg = Color(0xFF0B2A36)
 
     // ✅ pick the right list
     val movies by when (category) {

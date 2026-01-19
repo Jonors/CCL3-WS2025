@@ -36,8 +36,10 @@ fun AppNavHost(viewModel: MovieViewModel) {
 
     // current route (für selected tab)
     val currentRoute = navBackStackEntry?.destination?.route
+    val bg = androidx.compose.ui.graphics.Color(0xFF0B2A36)
 
     Scaffold(
+        containerColor = bg,
         bottomBar = {
             val bg = androidx.compose.ui.graphics.Color(0xFF0B2A36)
             val selected = androidx.compose.ui.graphics.Color(0xFFF2B400)
@@ -202,12 +204,5 @@ fun AppNavHost(viewModel: MovieViewModel) {
 
         }
 
-    }
-}
-
-@Composable
-private fun StatsPlaceholderScreen() {
-    Surface {
-        Text("Stats coming soon…")
     }
 }

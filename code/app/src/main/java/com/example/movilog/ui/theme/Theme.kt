@@ -1,7 +1,6 @@
 package com.example.movilog.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -10,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
 
 // We define a dark palette to match your MoviLog design
 private val DarkColorScheme = darkColorScheme(
@@ -35,6 +35,7 @@ fun MoviLogTheme(
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }
+
 
     MaterialTheme(
         colorScheme = DarkColorScheme,
