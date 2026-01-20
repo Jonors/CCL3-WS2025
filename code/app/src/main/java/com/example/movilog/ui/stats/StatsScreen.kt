@@ -16,6 +16,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.MovieViewModel
+import java.time.LocalDate
+import java.time.YearMonth
+import androidx.compose.foundation.clickable // Add this import
+import androidx.compose.ui.window.Dialog
 
 
 @Composable
@@ -24,6 +28,7 @@ fun StatsScreen(
     onMovieClick: (Int) -> Unit
 ) {
     val state by viewModel.statsState.collectAsState()
+    val now = LocalDate.now()
     val bg = Color(0xFF0B2A36)
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
     val accent = Color(0xFFF2B400)
@@ -38,7 +43,11 @@ fun StatsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Text("Statistics", color = Color.White, style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    "Statistics",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium
+                )
             }
 
             item {
@@ -60,6 +69,8 @@ fun StatsScreen(
 
             item {
                 Card(
+
+
                     colors = CardDefaults.cardColors(containerColor = cardBg),
                     shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -78,6 +89,8 @@ fun StatsScreen(
                         Spacer(Modifier.height(10.dp))
 
                         MonthlyHeatmap(
+                            year = now.year,
+                            month = now.monthValue,
                             heatmap = state.heatmap,
                             accent = accent
                         )
@@ -86,7 +99,11 @@ fun StatsScreen(
             }
 
             item {
-                Text("Favorite Movies", color = Color.White, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Favorite Movies",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
 
             item {
@@ -94,7 +111,11 @@ fun StatsScreen(
             }
 
             item {
-                Text("Recently Watched Movies", color = Color.White, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Recently Watched Movies",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
 
             item {
@@ -113,7 +134,11 @@ private fun StatCard(title: String, value: String, cardBg: Color, modifier: Modi
         modifier = modifier
     ) {
         Column(Modifier.padding(14.dp)) {
-            Text(title, color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.titleSmall)
+            Text(
+                title,
+                color = Color.White.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.titleSmall
+            )
             Spacer(Modifier.height(6.dp))
             Text(value, color = Color.White, style = MaterialTheme.typography.headlineSmall)
         }
@@ -121,54 +146,111 @@ private fun StatCard(title: String, value: String, cardBg: Color, modifier: Modi
 }
 
 @Composable
-private fun MonthlyHeatmap(heatmap: List<Int>, accent: Color) {
-    // heatmap is weeks*7, Mon..Sun
+fun MonthlyHeatmap(
+    year: Int,
+    month: Int,
+    heatmap: List<Int>,
+    accent: Color
+) {
     val emptyColor = Color.White.copy(alpha = 0.18f)
     val midColor = accent.copy(alpha = 0.55f)
     val fullColor = accent
 
-    val weeks = if (heatmap.isEmpty()) 0 else heatmap.size / 7
-    val dayLabels = listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+    // Dialog state
+    var selectedDayIndex by remember { mutableStateOf<Int?>(null) }
+
+    val yearMonth = YearMonth.of(year, month)
+    val daysInActualMonth = yearMonth.lengthOfMonth()
+    val firstDayOfMonth = LocalDate.of(year, month, 1)
+    val startOffset = firstDayOfMonth.dayOfWeek.value - 1
+
+    val totalSlotsNeeded = startOffset + daysInActualMonth
+    val totalWeeks = if (totalSlotsNeeded % 7 == 0) totalSlotsNeeded / 7 else (totalSlotsNeeded / 7) + 1
+
+    val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.Top) {
+            // Day Labels Column
             Column(Modifier.width(40.dp)) {
                 dayLabels.forEach { d ->
-                    Text(d, color = Color.White.copy(alpha = 0.75f), style = MaterialTheme.typography.labelSmall)
-                    Spacer(Modifier.height(8.dp))
+                    Box(Modifier.height(18.dp), contentAlignment = Alignment.CenterStart) {
+                        Text(d, color = Color.White.copy(0.75f), style = MaterialTheme.typography.labelSmall)
+                    }
+                    Spacer(Modifier.height(10.dp))
                 }
             }
 
+            // Grid
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                for (w in 0 until weeks) {
+                for (w in 0 until totalWeeks) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         for (dow in 0 until 7) {
-                            val v = heatmap[w * 7 + dow]
-                            val c = when {
-                                v <= 0 -> emptyColor
-                                v == 1 -> midColor
-                                else -> fullColor
+                            val dayIndexInGrid = (w * 7) + dow
+                            val dayOfMonthIndex = dayIndexInGrid - startOffset
+
+                            if (dayOfMonthIndex in 0 until daysInActualMonth) {
+                                val v = heatmap.getOrNull(dayOfMonthIndex) ?: 0
+                                val c = when {
+                                    v <= 0 -> emptyColor
+                                    v == 1 -> midColor
+                                    else -> fullColor
+                                }
+                                Box(
+                                    Modifier
+                                        .size(18.dp)
+                                        .background(c, RoundedCornerShape(6.dp))
+                                        .clickable { selectedDayIndex = dayOfMonthIndex }
+                                )
+                            } else {
+                                Box(Modifier.size(18.dp))
                             }
-                            Box(
-                                Modifier
-                                    .size(18.dp)
-                                    .background(c, RoundedCornerShape(6.dp))
-                            )
                         }
                     }
                 }
             }
         }
 
-        Spacer(Modifier.height(10.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(14.dp).background(emptyColor, RoundedCornerShape(4.dp)))
-            Text("Less", color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
-            Box(Modifier.size(14.dp).background(midColor, RoundedCornerShape(4.dp)))
-            Box(Modifier.size(14.dp).background(fullColor, RoundedCornerShape(4.dp)))
-            Text("More", color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
+        // 1. Legend moved below the grid row
+        Spacer(Modifier.height(16.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Less", color = Color.White.copy(0.6f), style = MaterialTheme.typography.labelSmall)
+            Spacer(Modifier.width(6.dp))
+            Box(Modifier.size(10.dp).background(emptyColor, RoundedCornerShape(2.dp)))
+            Spacer(Modifier.width(4.dp))
+            Box(Modifier.size(10.dp).background(midColor, RoundedCornerShape(2.dp)))
+            Spacer(Modifier.width(4.dp))
+            Box(Modifier.size(10.dp).background(fullColor, RoundedCornerShape(2.dp)))
+            Spacer(Modifier.width(6.dp))
+            Text("More", color = Color.White.copy(0.6f), style = MaterialTheme.typography.labelSmall)
         }
+    }
+
+    // 2. Click Feature: Showing the Date and Count
+    selectedDayIndex?.let { index ->
+        val date = LocalDate.of(year, month, index + 1)
+        val count = heatmap.getOrNull(index) ?: 0
+
+        AlertDialog(
+            onDismissRequest = { selectedDayIndex = null },
+            confirmButton = {
+                TextButton(onClick = { selectedDayIndex = null }) {
+                    Text("Close", color = accent)
+                }
+            },
+            title = {
+                Text(
+                    text = "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { it.uppercase() }} $year",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            text = {
+                Text("Movies watched: $count")
+            },
+            containerColor = Color(0xFF1B3A46), // Dark slate to match your theme
+            titleContentColor = Color.White,
+            textContentColor = Color.White.copy(alpha = 0.8f)
+        )
     }
 }
 

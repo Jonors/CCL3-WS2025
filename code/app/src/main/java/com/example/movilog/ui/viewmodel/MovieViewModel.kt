@@ -198,15 +198,22 @@ class MovieViewModel(
     fun deleteMovie(movieId: Int) { viewModelScope.launch { repository.delete(movieId) } }
 
     private fun buildMonthHeatmap(yearMonth: YearMonth, watchedAtMillis: List<Long>): List<Int> {
-        val grid = MutableList(42) { 0 }
-        val firstDayIdx = (yearMonth.atDay(1).dayOfWeek.value - 1)
+        // 1. Get the actual number of days in this specific month
+        val daysInMonth = yearMonth.lengthOfMonth()
+        val dayCounts = MutableList(daysInMonth) { 0 }
+
         watchedAtMillis.forEach { ms ->
             val date = Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).toLocalDate()
+            // 2. Only count if it's within the current year and month
             if (date.year == yearMonth.year && date.month == yearMonth.month) {
-                grid[firstDayIdx + date.dayOfMonth - 1]++
+                // dayOfMonth is 1-indexed, so subtract 1 for the 0-indexed list
+                val dayIdx = date.dayOfMonth - 1
+                if (dayIdx in dayCounts.indices) {
+                    dayCounts[dayIdx]++
+                }
             }
         }
-        return grid
+        return dayCounts
     }
 
     // --- CUSTOM LISTS (Restored) ---
