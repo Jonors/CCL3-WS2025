@@ -18,8 +18,14 @@ import com.example.movilog.data.model.Movie
 import com.example.movilog.ui.MovieViewModel
 import java.time.LocalDate
 import java.time.YearMonth
-import androidx.compose.foundation.clickable // Add this import
-import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Today
+import java.time.Instant
+import java.time.ZoneId
 
 
 @Composable
@@ -28,7 +34,7 @@ fun StatsScreen(
     onMovieClick: (Int) -> Unit
 ) {
     val state by viewModel.statsState.collectAsState()
-    val now = LocalDate.now()
+    val selectedMonthState by viewModel.selectedMonth.collectAsState()
     val bg = Color(0xFF0B2A36)
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
     val accent = Color(0xFFF2B400)
@@ -53,7 +59,7 @@ fun StatsScreen(
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
-                        title = "Movies Watched",
+                        title = "Movies watched this month",
                         value = state.watchedCount.toString(),
                         cardBg = cardBg,
                         modifier = Modifier.weight(1f)
@@ -66,11 +72,11 @@ fun StatsScreen(
                     )
                 }
             }
-
             item {
+                val isNotCurrentMonth = selectedMonthState != YearMonth.now()
+                var showYearPicker by remember { mutableStateOf(false) }
+
                 Card(
-
-
                     colors = CardDefaults.cardColors(containerColor = cardBg),
                     shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -81,18 +87,88 @@ fun StatsScreen(
                             color = Color.White.copy(alpha = 0.9f),
                             style = MaterialTheme.typography.titleSmall
                         )
-                        Text(
-                            state.monthLabel,
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        // Stable Navigation Bar
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            IconButton(onClick = { viewModel.prevMonth() }) {
+                                Icon(Icons.Default.ChevronLeft, "Prev", tint = Color.White)
+                            }
+
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(1f)) {
+                                TextButton(onClick = { showYearPicker = true }) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            state.monthLabel,
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowDropDown,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+
+                                DropdownMenu(
+                                    expanded = showYearPicker,
+                                    onDismissRequest = { showYearPicker = false },
+                                    modifier = Modifier
+                                        .background(Color(0xFF1B3A46))
+                                        .heightIn(max = 300.dp)
+                                ) {
+                                    viewModel.getYearRange().forEach { year ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    year.toString(),
+                                                    color = if (year == selectedMonthState.year) accent else Color.White
+                                                )
+                                            },
+                                            onClick = {
+                                                viewModel.selectYear(year)
+                                                showYearPicker = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Next Month Button
+                            IconButton(onClick = { viewModel.nextMonth() }) {
+                                Icon(Icons.Default.ChevronRight, "Next", tint = Color.White)
+                            }
+
+                            // Re-positioned "Today" button that doesn't push the center label
+                            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                                if (isNotCurrentMonth) {
+                                    IconButton(onClick = { viewModel.jumpToToday() }) {
+                                        Icon(
+                                            Icons.Default.Today,
+                                            "Jump to Today",
+                                            tint = accent,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         Spacer(Modifier.height(10.dp))
 
                         MonthlyHeatmap(
-                            year = now.year,
-                            month = now.monthValue,
+                            year = selectedMonthState.year,
+                            month = selectedMonthState.monthValue,
                             heatmap = state.heatmap,
-                            accent = accent
+                            accent = accent,
+                            watchedMovies = state.watchedInMonth
                         )
                     }
                 }
@@ -123,7 +199,6 @@ fun StatsScreen(
             }
         }
     }
-
 }
 
 @Composable
@@ -150,13 +225,13 @@ fun MonthlyHeatmap(
     year: Int,
     month: Int,
     heatmap: List<Int>,
-    accent: Color
+    accent: Color,
+    watchedMovies: List<Movie> // Add this parameter
 ) {
     val emptyColor = Color.White.copy(alpha = 0.18f)
     val midColor = accent.copy(alpha = 0.55f)
     val fullColor = accent
 
-    // Dialog state
     var selectedDayIndex by remember { mutableStateOf<Int?>(null) }
 
     val yearMonth = YearMonth.of(year, month)
@@ -165,23 +240,26 @@ fun MonthlyHeatmap(
     val startOffset = firstDayOfMonth.dayOfWeek.value - 1
 
     val totalSlotsNeeded = startOffset + daysInActualMonth
-    val totalWeeks = if (totalSlotsNeeded % 7 == 0) totalSlotsNeeded / 7 else (totalSlotsNeeded / 7) + 1
+    val totalWeeks =
+        if (totalSlotsNeeded % 7 == 0) totalSlotsNeeded / 7 else (totalSlotsNeeded / 7) + 1
 
     val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
     Column {
         Row(verticalAlignment = Alignment.Top) {
-            // Day Labels Column
             Column(Modifier.width(40.dp)) {
                 dayLabels.forEach { d ->
                     Box(Modifier.height(18.dp), contentAlignment = Alignment.CenterStart) {
-                        Text(d, color = Color.White.copy(0.75f), style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            d,
+                            color = Color.White.copy(0.75f),
+                            style = MaterialTheme.typography.labelSmall
+                        )
                     }
                     Spacer(Modifier.height(10.dp))
                 }
             }
 
-            // Grid
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 for (w in 0 until totalWeeks) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -211,25 +289,45 @@ fun MonthlyHeatmap(
             }
         }
 
-        // 1. Legend moved below the grid row
         Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Less", color = Color.White.copy(0.6f), style = MaterialTheme.typography.labelSmall)
+            Text(
+                "Less",
+                color = Color.White.copy(0.6f),
+                style = MaterialTheme.typography.labelSmall
+            )
             Spacer(Modifier.width(6.dp))
-            Box(Modifier.size(10.dp).background(emptyColor, RoundedCornerShape(2.dp)))
+            Box(Modifier
+                .size(10.dp)
+                .background(emptyColor, RoundedCornerShape(2.dp)))
             Spacer(Modifier.width(4.dp))
-            Box(Modifier.size(10.dp).background(midColor, RoundedCornerShape(2.dp)))
+            Box(Modifier
+                .size(10.dp)
+                .background(midColor, RoundedCornerShape(2.dp)))
             Spacer(Modifier.width(4.dp))
-            Box(Modifier.size(10.dp).background(fullColor, RoundedCornerShape(2.dp)))
+            Box(Modifier
+                .size(10.dp)
+                .background(fullColor, RoundedCornerShape(2.dp)))
             Spacer(Modifier.width(6.dp))
-            Text("More", color = Color.White.copy(0.6f), style = MaterialTheme.typography.labelSmall)
+            Text(
+                "More",
+                color = Color.White.copy(0.6f),
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 
-    // 2. Click Feature: Showing the Date and Count
+    // Dialog showing Titles
     selectedDayIndex?.let { index ->
-        val date = LocalDate.of(year, month, index + 1)
-        val count = heatmap.getOrNull(index) ?: 0
+        val selectedDate = LocalDate.of(year, month, index + 1)
+
+        // Filter movies that match this specific date
+        val moviesOnThisDay = watchedMovies.filter { movie ->
+            movie.watchedAt?.let { ms ->
+                val date = Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).toLocalDate()
+                date == selectedDate
+            } ?: false
+        }
 
         AlertDialog(
             onDismissRequest = { selectedDayIndex = null },
@@ -240,16 +338,42 @@ fun MonthlyHeatmap(
             },
             title = {
                 Text(
-                    text = "${date.dayOfMonth} ${date.month.name.lowercase().replaceFirstChar { it.uppercase() }} $year",
+                    text = "${selectedDate.dayOfMonth} ${
+                        selectedDate.month.name.lowercase().replaceFirstChar { it.uppercase() }
+                    } $year",
                     style = MaterialTheme.typography.titleMedium
                 )
             },
             text = {
-                Text("Movies watched: $count")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (moviesOnThisDay.isEmpty()) {
+                        Text(
+                            "No movies recorded for this day.",
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    } else {
+                        moviesOnThisDay.forEach { movie ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    Modifier
+                                        .size(6.dp)
+                                        .background(accent, RoundedCornerShape(50))
+                                        .padding(end = 8.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    movie.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
             },
-            containerColor = Color(0xFF1B3A46), // Dark slate to match your theme
+            containerColor = Color(0xFF1B3A46),
             titleContentColor = Color.White,
-            textContentColor = Color.White.copy(alpha = 0.8f)
+            textContentColor = Color.White
         )
     }
 }

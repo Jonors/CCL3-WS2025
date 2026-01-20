@@ -150,20 +150,53 @@ class MovieViewModel(
 
 
     // --- STATS & DETAILS (Restored) ---
-    val statsState: StateFlow<StatsUiState> = repository.watchedFlow()
-        .map { watched ->
-            val watchedOnly = watched.filter { it.isWatched && it.watchedAt != null }
-            val yearMonth = YearMonth.from(LocalDate.now())
-            StatsUiState(
-                watchedCount = watchedOnly.size,
-                totalMinutes = watchedOnly.sumOf { it.runtimeMinutes ?: 0 },
-                monthLabel = "${yearMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${yearMonth.year}",
-                heatmap = buildMonthHeatmap(yearMonth, watchedOnly.mapNotNull { it.watchedAt }),
-                favorites = watchedOnly.filter { (it.userRating ?: 0f) > 0f }.sortedByDescending { it.userRating ?: 0f }.take(10),
-                recent = watchedOnly.sortedByDescending { it.watchedAt ?: 0L }.take(10)
-            )
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatsUiState())
+    private val _selectedMonth = MutableStateFlow(YearMonth.now())
+    val selectedMonth = _selectedMonth.asStateFlow()
 
+    fun nextMonth() {
+        _selectedMonth.value = _selectedMonth.value.plusMonths(1)
+    }
+
+    fun prevMonth() {
+        _selectedMonth.value = _selectedMonth.value.minusMonths(1)
+    }
+
+    fun jumpToToday() {
+        _selectedMonth.value = YearMonth.now()
+    }
+
+    fun selectYear(year: Int) {
+        _selectedMonth.value = YearMonth.of(year, _selectedMonth.value.monthValue)
+    }
+
+    fun getYearRange(): List<Int> {
+        val startYear = 2010
+        val currentYear = LocalDate.now().year
+        return (startYear..currentYear).toList().reversed()
+    }
+
+    val statsState: StateFlow<StatsUiState> = combine(
+        repository.watchedFlow(),
+        _selectedMonth
+    ) { watched, currentMonth ->
+        val watchedOnly = watched.filter { it.isWatched && it.watchedAt != null }
+
+        // Filter watched movies to ONLY those in the selected month for heatmap/count
+        val moviesInSelectedMonth = watchedOnly.filter {
+            val date = Instant.ofEpochMilli(it.watchedAt!!).atZone(ZoneId.systemDefault()).toLocalDate()
+            YearMonth.from(date) == currentMonth
+        }
+
+        StatsUiState(
+            watchedCount = moviesInSelectedMonth.size,
+            totalMinutes = watchedOnly.sumOf { it.runtimeMinutes ?: 0 },
+            monthLabel = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${currentMonth.year}",
+            heatmap = buildMonthHeatmap(currentMonth, watchedOnly.mapNotNull { it.watchedAt }),
+            favorites = watchedOnly.filter { (it.userRating ?: 0f) > 0f }.sortedByDescending { it.userRating ?: 0f }.take(10),
+            recent = watchedOnly.sortedByDescending { it.watchedAt ?: 0L }.take(10),
+            watchedInMonth = moviesInSelectedMonth // Use this for the click-to-see-titles feature
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatsUiState())
     data class MovieDetailUiState(val isLoading: Boolean = true, val details: MovieDetailsDto? = null, val inWatchlist: Boolean = false, val isWatched: Boolean = false, val userRating: Float? = null)
     private val _detailState = MutableStateFlow(MovieDetailUiState())
     val detailState = _detailState.asStateFlow()

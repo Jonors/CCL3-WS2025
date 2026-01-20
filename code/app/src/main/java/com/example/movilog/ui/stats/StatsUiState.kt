@@ -6,7 +6,8 @@ data class StatsUiState(
     val watchedCount: Int = 0,
     val totalMinutes: Int = 0,
     val monthLabel: String = "",
-    val heatmap: List<Int> = emptyList(), // weeks * 7 (Mon..Sun)
+    val heatmap: List<Int> = emptyList(),
     val favorites: List<Movie> = emptyList(),
-    val recent: List<Movie> = emptyList()
+    val recent: List<Movie> = emptyList(),
+    val watchedInMonth: List<Movie> = emptyList() // Added field
 )
