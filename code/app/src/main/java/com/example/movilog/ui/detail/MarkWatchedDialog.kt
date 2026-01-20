@@ -22,7 +22,6 @@ import kotlin.math.floor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import kotlinx.coroutines.flow.filter
 import kotlin.math.abs
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Spacer
