@@ -1,6 +1,7 @@
 package com.example.movilog.ui.seeall
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -74,7 +75,8 @@ fun WatchedAllScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(16.dp)
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+
                 ) {
                     items(
                         items = watched,
@@ -88,9 +90,13 @@ fun WatchedAllScreen(
                             },
                             onDeleteClick = { movieToRemoveId = movie.id }
                         )
+
                     }
+
                 }
+
             }
+
 
             if (movieToRemoveId != null) {
                 val id = movieToRemoveId!!
@@ -109,8 +115,11 @@ fun WatchedAllScreen(
                     }
                 )
             }
+
         }
+
     }
+
 }
 
 @Composable
@@ -177,5 +186,7 @@ private fun WatchedMovieRow(
                 }
             }
         }
+
     }
+
 }

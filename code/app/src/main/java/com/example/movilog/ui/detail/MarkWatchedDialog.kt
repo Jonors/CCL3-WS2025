@@ -22,10 +22,9 @@ import kotlin.math.floor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import kotlinx.coroutines.flow.filter
 import kotlin.math.abs
-
-
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Spacer
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,8 +78,9 @@ fun MarkWatchedDialog(
                     value = ratingInt,
                     onValueChange = { ratingInt = it },
                     accent = accent,
-                    inactive = Color.White.copy(alpha = 0.25f)
+                    inactive = Color.White.copy(alpha = 0.25f),
                 )
+
 
                 Text(
                     text = if (ratingInt == 0) "Select rating: 1–10" else "Selected rating: $ratingInt / 10",
@@ -149,54 +149,68 @@ private fun StarRating10(
     accent: Color,
     inactive: Color
 ) {
-    // star row sizing
-    val starSize = 26.dp
     val gap = 6.dp
 
-    val density = LocalDensity.current
-    val starPx = with(density) { starSize.toPx() }
-    val gapPx = with(density) { gap.toPx() }
-
-    // Total width = 10 stars + 9 gaps
-    val totalWidthPx = remember { (starPx * 10f) + (gapPx * 9f) }
-
-    Row(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 4.dp)
     ) {
-        // pointerInput area wraps the stars
+        // verfügbare Breite im Dialog
+        val availableWidth = maxWidth
+
+        // dynamische Stern-Größe, damit garantiert 10 Sterne reinpassen
+        val starSize = ((availableWidth - gap * 9) / 10f).coerceIn(18.dp, 26.dp)
+
+        val density = LocalDensity.current
+        val starPx = with(density) { starSize.toPx() }
+        val gapPx = with(density) { gap.toPx() }
+
         Row(
-            modifier = Modifier
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { offset ->
-                            val r = ratingFromOffset(offset.x, starPx, gapPx)
-                            onValueChange(r)
-                        },
-                        onDrag = { change, _ ->
-                            val r = ratingFromOffset(change.position.x, starPx, gapPx)
-                            onValueChange(r)
-                        }
-                    )
-                }
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            for (i in 1..10) {
-                val c = if (i <= value) accent else inactive
-                Text(
-                    text = "★",
-                    color = c,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.size(starSize),
-                    textAlign = TextAlign.Center
-                )
-                if (i != 10) Spacer(Modifier.width(gap))
+            // Drag AREA über die ganze Sternreihe
+            Row(
+                modifier = Modifier
+                    .pointerInput(starSize, gap) {
+                        detectDragGestures(
+                            onDragStart = { offset ->
+                                val r = ratingFromOffset(offset.x, starPx, gapPx)
+                                onValueChange(r)
+                            },
+                            onDrag = { change, _ ->
+                                val r = ratingFromOffset(change.position.x, starPx, gapPx)
+                                onValueChange(r)
+                            }
+                        )
+                    }
+            ) {
+                for (i in 1..10) {
+                    val c = if (i <= value) accent else inactive
+
+                    Text(
+                        text = "★",
+                        color = c,
+                        fontSize = with(LocalDensity.current) { starSize.toSp() },
+                        lineHeight = with(LocalDensity.current) { starSize.toSp() },
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            // ✅ Tap/Click pro Stern
+                            .pointerInput(i) {
+                                detectTapGestures {
+                                    onValueChange(i)
+                                }
+                            }
+                    )
+                    if (i != 10) Spacer(Modifier.width(gap))
+                }
             }
         }
     }
 }
+
 
 private fun ratingFromOffset(x: Float, starPx: Float, gapPx: Float): Int {
     // each "cell" = star + gap (except last gap, but close enough)
