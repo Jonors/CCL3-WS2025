@@ -75,7 +75,7 @@ fun WatchedAllScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+                    contentPadding = PaddingValues(top = 16.dp,  bottom = 90.dp),
 
                 ) {
                     items(

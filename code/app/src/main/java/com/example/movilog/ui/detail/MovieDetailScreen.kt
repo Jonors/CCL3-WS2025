@@ -76,7 +76,7 @@ fun MovieDetailScreen(
                 val d = state.details!!
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(bottom = 80.dp)
+                    contentPadding = PaddingValues(bottom = 105.dp)
                 ) {
                     item { HeroCard(d, cardBg, state.isWatched) }
 

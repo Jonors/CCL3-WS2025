@@ -33,7 +33,7 @@ fun WatchlistScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+            contentPadding = PaddingValues(top = 16.dp,  bottom = 105.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
