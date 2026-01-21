@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
@@ -20,7 +21,7 @@ data class BottomNavItem(
 
 val bottomNavItems = listOf(
     BottomNavItem(Routes.BROWSE, "Browse", Icons.Filled.Search),
-    BottomNavItem(Routes.WATCHLIST, "Watchlist", Icons.Filled.Star),
+    BottomNavItem(Routes.WATCHLIST, "Watchlist", Icons.Filled.RemoveRedEye),
     BottomNavItem(Routes.MY_LISTS, "My Lists", Icons.Filled.List),
     BottomNavItem(Routes.STATS, "Stats", Icons.Filled.BarChart),
 )
