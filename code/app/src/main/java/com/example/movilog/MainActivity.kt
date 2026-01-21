@@ -22,7 +22,9 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_MoviLog)
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // ✅ Edge-to-edge setup
         WindowCompat.setDecorFitsSystemWindows(window, false)
