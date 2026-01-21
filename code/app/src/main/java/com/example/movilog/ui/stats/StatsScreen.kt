@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Today
+import androidx.compose.ui.text.style.TextAlign
 import java.time.Instant
 import java.time.ZoneId
 
@@ -45,7 +46,7 @@ fun StatsScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 105.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
@@ -56,22 +57,24 @@ fun StatsScreen(
                 )
             }
 
+            // Top Section: Overall Stats
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
-                        title = "Movies watched this month",
-                        value = state.watchedCount.toString(),
+                        title = "Total Watched",
+                        value = "${state.watchedCount}",
                         cardBg = cardBg,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
-                        title = "Time spent overall",
-                        value = formatTotalTime(state.totalMinutes),
+                        title = "Total Watch Time",
+                        value = formatTotalTime(state.totalMinutes), // Shows "1d 6h 15m"
                         cardBg = cardBg,
                         modifier = Modifier.weight(1f)
                     )
                 }
             }
+
             item {
                 val isNotCurrentMonth = selectedMonthState != YearMonth.now()
                 var showYearPicker by remember { mutableStateOf(false) }
@@ -83,24 +86,26 @@ fun StatsScreen(
                 ) {
                     Column(Modifier.padding(14.dp)) {
                         Text(
-                            "Movies watched this month",
+                            "Movies watched history",
                             color = Color.White.copy(alpha = 0.9f),
                             style = MaterialTheme.typography.titleSmall
                         )
 
                         Spacer(Modifier.height(8.dp))
 
-                        // Stable Navigation Bar
+                        // Navigation Bar
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(onClick = { viewModel.prevMonth() }) {
                                 Icon(Icons.Default.ChevronLeft, "Prev", tint = Color.White)
                             }
 
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(1f)) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 TextButton(onClick = { showYearPicker = true }) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
@@ -108,15 +113,10 @@ fun StatsScreen(
                                             color = Color.White,
                                             style = MaterialTheme.typography.titleMedium
                                         )
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowDropDown,
-                                            contentDescription = null,
-                                            tint = Color.White,
-                                            modifier = Modifier.size(20.dp)
-                                        )
+                                        Icon(Icons.Default.ArrowDropDown, null, tint = Color.White)
                                     }
                                 }
-
+                                // Dropdown logic remains same
                                 DropdownMenu(
                                     expanded = showYearPicker,
                                     onDismissRequest = { showYearPicker = false },
@@ -133,26 +133,23 @@ fun StatsScreen(
                                                 )
                                             },
                                             onClick = {
-                                                viewModel.selectYear(year)
-                                                showYearPicker = false
+                                                viewModel.selectYear(year); showYearPicker = false
                                             }
                                         )
                                     }
                                 }
                             }
 
-                            // Next Month Button
                             IconButton(onClick = { viewModel.nextMonth() }) {
                                 Icon(Icons.Default.ChevronRight, "Next", tint = Color.White)
                             }
 
-                            // Re-positioned "Today" button that doesn't push the center label
                             Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
                                 if (isNotCurrentMonth) {
                                     IconButton(onClick = { viewModel.jumpToToday() }) {
                                         Icon(
                                             Icons.Default.Today,
-                                            "Jump to Today",
+                                            null,
                                             tint = accent,
                                             modifier = Modifier.size(20.dp)
                                         )
@@ -163,17 +160,49 @@ fun StatsScreen(
 
                         Spacer(Modifier.height(10.dp))
 
-                        MonthlyHeatmap(
-                            year = selectedMonthState.year,
-                            month = selectedMonthState.monthValue,
-                            heatmap = state.heatmap,
-                            accent = accent,
-                            watchedMovies = state.watchedInMonth
-                        )
+                        // Heatmap and Monthly Stats Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Left Side: Heatmap
+                            Box(modifier = Modifier.weight(1f)) {
+                                MonthlyHeatmap(
+                                    year = selectedMonthState.year,
+                                    month = selectedMonthState.monthValue,
+                                    heatmap = state.heatmap,
+                                    accent = accent,
+                                    watchedMovies = state.watchedInMonth
+                                )
+                            }
+
+                            Spacer(Modifier.width(16.dp))
+
+                            // Right Side: Monthly Summary Info
+                            Column(
+                                modifier = Modifier.width(115.dp), // Increased width for "dd hh mm" string
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                Text("This Month", color = Color.White.copy(0.6f), style = MaterialTheme.typography.labelSmall)
+                                Text("${state.watchedInMonth.size} movies", color = Color.White, style = MaterialTheme.typography.bodyLarge)
+
+                                Spacer(Modifier.height(16.dp))
+
+                                Text("Watch Time", color = Color.White.copy(0.6f), style = MaterialTheme.typography.labelSmall)
+                                Text(
+                                    formatTotalTime(state.watchedInMonth.sumOf { it.runtimeMinutes ?: 0 }),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.End
+                                )
+                            }
+                        }
                     }
                 }
             }
 
+            // ... Favorite and Recently Watched items
             item {
                 Text(
                     "Favorite Movies",
@@ -181,11 +210,7 @@ fun StatsScreen(
                     style = MaterialTheme.typography.titleLarge
                 )
             }
-
-            item {
-                PosterRow(movies = state.favorites, onMovieClick = onMovieClick)
-            }
-
+            item { PosterRow(movies = state.favorites, onMovieClick = onMovieClick) }
             item {
                 Text(
                     "Recently Watched Movies",
@@ -193,10 +218,7 @@ fun StatsScreen(
                     style = MaterialTheme.typography.titleLarge
                 )
             }
-
-            item {
-                PosterRow(movies = state.recent, onMovieClick = onMovieClick)
-            }
+            item { PosterRow(movies = state.recent, onMovieClick = onMovieClick) }
         }
     }
 }
@@ -297,17 +319,23 @@ fun MonthlyHeatmap(
                 style = MaterialTheme.typography.labelSmall
             )
             Spacer(Modifier.width(6.dp))
-            Box(Modifier
-                .size(10.dp)
-                .background(emptyColor, RoundedCornerShape(2.dp)))
+            Box(
+                Modifier
+                    .size(10.dp)
+                    .background(emptyColor, RoundedCornerShape(2.dp))
+            )
             Spacer(Modifier.width(4.dp))
-            Box(Modifier
-                .size(10.dp)
-                .background(midColor, RoundedCornerShape(2.dp)))
+            Box(
+                Modifier
+                    .size(10.dp)
+                    .background(midColor, RoundedCornerShape(2.dp))
+            )
             Spacer(Modifier.width(4.dp))
-            Box(Modifier
-                .size(10.dp)
-                .background(fullColor, RoundedCornerShape(2.dp)))
+            Box(
+                Modifier
+                    .size(10.dp)
+                    .background(fullColor, RoundedCornerShape(2.dp))
+            )
             Spacer(Modifier.width(6.dp))
             Text(
                 "More",
@@ -419,7 +447,13 @@ private fun PosterRow(movies: List<Movie>, onMovieClick: (Int) -> Unit) {
 private fun formatTotalTime(totalMinutes: Int): String {
     val minutes = totalMinutes.coerceAtLeast(0)
     val days = minutes / (60 * 24)
-    val rem = minutes % (60 * 24)
-    val hours = rem / 60
-    return "${hours}h ${days}d"
+    val remainingAfterDays = minutes % (60 * 24)
+    val hours = remainingAfterDays / 60
+    val finalMinutes = remainingAfterDays % 60
+
+    return when {
+        days > 0 -> "${days}d ${hours}h ${finalMinutes}m"
+        hours > 0 -> "${hours}h ${finalMinutes}m"
+        else -> "${finalMinutes}m"
+    }
 }

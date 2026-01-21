@@ -175,26 +175,28 @@ class MovieViewModel(
         return (startYear..currentYear).toList().reversed()
     }
 
+    // Inside MovieViewModel.kt
+
     val statsState: StateFlow<StatsUiState> = combine(
         repository.watchedFlow(),
         _selectedMonth
     ) { watched, currentMonth ->
-        val watchedOnly = watched.filter { it.isWatched && it.watchedAt != null }
+        val allWatched = watched.filter { it.isWatched && it.watchedAt != null }
 
-        // Filter watched movies to ONLY those in the selected month for heatmap/count
-        val moviesInSelectedMonth = watchedOnly.filter {
+        // Filter specifically for the selected month in the archive
+        val moviesInMonth = allWatched.filter {
             val date = Instant.ofEpochMilli(it.watchedAt!!).atZone(ZoneId.systemDefault()).toLocalDate()
             YearMonth.from(date) == currentMonth
         }
 
         StatsUiState(
-            watchedCount = moviesInSelectedMonth.size,
-            totalMinutes = watchedOnly.sumOf { it.runtimeMinutes ?: 0 },
+            watchedCount = allWatched.size, // Total for top cards
+            totalMinutes = allWatched.sumOf { it.runtimeMinutes ?: 0 }, // Total for top cards
             monthLabel = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${currentMonth.year}",
-            heatmap = buildMonthHeatmap(currentMonth, watchedOnly.mapNotNull { it.watchedAt }),
-            favorites = watchedOnly.filter { (it.userRating ?: 0f) > 0f }.sortedByDescending { it.userRating ?: 0f }.take(10),
-            recent = watchedOnly.sortedByDescending { it.watchedAt ?: 0L }.take(10),
-            watchedInMonth = moviesInSelectedMonth // Use this for the click-to-see-titles feature
+            heatmap = buildMonthHeatmap(currentMonth, allWatched.mapNotNull { it.watchedAt }),
+            favorites = allWatched.filter { (it.userRating ?: 0f) > 0f }.sortedByDescending { it.userRating ?: 0f }.take(10),
+            recent = allWatched.sortedByDescending { it.watchedAt ?: 0L }.take(10),
+            watchedInMonth = moviesInMonth // Used for side panel and heatmap clicks
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StatsUiState())
     data class MovieDetailUiState(val isLoading: Boolean = true, val details: MovieDetailsDto? = null, val inWatchlist: Boolean = false, val isWatched: Boolean = false, val userRating: Float? = null)
