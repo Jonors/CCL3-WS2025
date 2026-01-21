@@ -108,7 +108,7 @@ fun MyListsScreen(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 70.dp),
             ) {
                 // 1. Static Watched List
                 item {

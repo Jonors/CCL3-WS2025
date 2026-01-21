@@ -127,7 +127,7 @@ fun BrowseScreen(
                 }
 
                 // Add enough bottom padding so the last item isn't covered by bottom nav
-                Spacer(Modifier.height(100.dp))
+                Spacer(Modifier.height(90.dp))
             }
         }
     }
