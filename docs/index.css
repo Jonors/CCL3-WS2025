@@ -205,6 +205,9 @@ th, td {
     transition: all 0.3s ease;
 }
 
+.charts {
+    width: 40rem;
+}
 
 
 footer {
@@ -244,3 +247,4 @@ footer {
         height: 10vh;
     }
 }
+
