@@ -73,7 +73,7 @@ fun MovieDetailScreen(
                 val d = state.details!!
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(bottom = 32.dp)
+                    contentPadding = PaddingValues(bottom = 105.dp)
                 ) {
                     item { HeroCard(d, cardBg, state.isWatched) }
 
@@ -110,7 +110,12 @@ fun MovieDetailScreen(
                             ) {
                                 // Add to Watchlist
                                 OutlinedButton(
-                                    onClick = { viewModel.addCurrentDetailToWatchlist() },
+                                    onClick = {
+                                        viewModel.addCurrentDetailToWatchlist()
+                                        navController.navigate(Routes.WATCHLIST) {
+                                            launchSingleTop = true
+                                        }
+                                              },
                                     modifier = Modifier.weight(1f),
                                     enabled = !state.inWatchlist && !state.isWatched,
                                     shape = RoundedCornerShape(12.dp),
