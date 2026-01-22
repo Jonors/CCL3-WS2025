@@ -249,6 +249,19 @@ class MovieViewModel(
         }
     }
 
+    fun markMovieAsWatchedFromWatchlist(movie: Movie, rating: Float, watchedAt: Long) {
+        viewModelScope.launch {
+            repository.upsert(
+                movie.copy(
+                    inWatchlist = false,
+                    isWatched = true,
+                    userRating = rating,
+                    watchedAt = watchedAt
+                )
+            )
+        }
+    }
+
     private fun detailsToEntity(d: MovieDetailsDto) = Movie(
         id = d.id,
         title = d.title,

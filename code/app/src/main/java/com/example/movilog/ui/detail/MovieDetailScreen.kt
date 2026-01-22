@@ -168,6 +168,7 @@ fun MovieDetailScreen(
         // Dialog Logic
         if (showWatchedDialog) {
             MarkWatchedDialog(
+                movieTitle = state.details?.title ?: "Movie", // Pass title here
                 onDismiss = { showWatchedDialog = false },
                 onConfirm = { rating, watchedAt ->
                     showWatchedDialog = false
