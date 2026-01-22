@@ -29,9 +29,11 @@ import kotlin.math.floor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarkWatchedDialog(
+    movieTitle: String,
     onDismiss: () -> Unit,
     onConfirm: (rating: Float, watchedAtMillis: Long) -> Unit
 ) {
@@ -48,9 +50,25 @@ fun MarkWatchedDialog(
     var month by remember { mutableIntStateOf(today.monthValue) }
     var day by remember { mutableIntStateOf(today.dayOfMonth) }
 
-    LaunchedEffect(year, month) {
-        val maxDay = YearMonth.of(year, month).lengthOfMonth()
-        if (day > maxDay) day = maxDay
+    LaunchedEffect(year, month, day) {
+        val now = LocalDate.now()
+
+        if (year > now.year) {
+            year = now.year
+        }
+
+        if (year == now.year && month > now.monthValue) {
+            month = now.monthValue
+        }
+
+        val maxDayInMonth = YearMonth.of(year, month).lengthOfMonth()
+        if (day > maxDayInMonth) {
+            day = maxDayInMonth
+        }
+
+        if (year == now.year && month == now.monthValue && day > now.dayOfMonth) {
+            day = now.dayOfMonth
+        }
     }
 
     val isError = hasInteracted && ratingInt == 0
@@ -62,7 +80,7 @@ fun MarkWatchedDialog(
         shape = RoundedCornerShape(28.dp),
         title = {
             Text(
-                "Mark as Watched",
+                "Mark ${movieTitle} as Watched",
                 color = Color.White,
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -233,9 +251,27 @@ private fun MiniDateWheelPicker(
     onYearChange: (Int) -> Unit, onMonthChange: (Int) -> Unit, onDayChange: (Int) -> Unit,
     accent: Color, cardBg: Color
 ) {
-    val years = remember { val now = LocalDate.now().year; (now - 50..now + 1).toList() }
-    val months = (1..12).toList()
-    val days = (1..YearMonth.of(year, month).lengthOfMonth()).toList()
+    val now = remember { LocalDate.now() }
+
+    // Years: from 50 years ago up to current year
+    val years = remember { (now.year - 50..now.year).toList() }
+
+    // Months: 1..12, but if current year is selected, only up to now.monthValue
+    val months = remember(year) {
+        val maxMonth = if (year >= now.year) now.monthValue else 12
+        (1..maxMonth).toList()
+    }
+
+    // Days: 1..maxInMonth, but if current year AND month are selected, only up to now.dayOfMonth
+    val days = remember(year, month) {
+        val maxInMonth = YearMonth.of(year, month).lengthOfMonth()
+        val actualMax = if (year >= now.year && month >= now.monthValue) {
+            now.dayOfMonth
+        } else {
+            maxInMonth
+        }
+        (1..actualMax).toList()
+    }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = cardBg),

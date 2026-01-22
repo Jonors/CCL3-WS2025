@@ -205,7 +205,7 @@ fun StatsScreen(
             // ... Favorite and Recently Watched items
             item {
                 Text(
-                    "Favorite Movies",
+                    "Highest rated movies",
                     color = Color.White,
                     style = MaterialTheme.typography.titleLarge
                 )

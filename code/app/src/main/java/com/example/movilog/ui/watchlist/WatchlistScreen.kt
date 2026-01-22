@@ -1,6 +1,8 @@
 package com.example.movilog.ui.watchlist
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,12 +14,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.movilog.data.model.Movie
-import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.ui.MovieViewModel
-import kotlinx.coroutines.flow.collectLatest
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-
+import com.example.movilog.ui.detail.MarkWatchedDialog // Ensure this import is correct
 
 @Composable
 fun WatchlistScreen(
@@ -27,42 +25,61 @@ fun WatchlistScreen(
     val watchlist by viewModel.watchlist.collectAsState(initial = emptyList())
     val bg = Color(0xFF0B2A36)
 
-    Scaffold(containerColor = bg) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp,  bottom = 105.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item {
-                Text(
-                    "Watchlist",
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Spacer(Modifier.height(12.dp))
-            }
+    // State to track which movie is currently being rated
+    var movieToMarkWatched by remember { mutableStateOf<Movie?>(null) }
 
-            if (watchlist.isEmpty()) {
+    Scaffold(containerColor = bg) { padding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 105.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 item {
                     Text(
-                        "No movies in your watchlist yet.",
-                        color = Color.White.copy(alpha = 0.8f)
+                        "Watchlist",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium
                     )
+                    Spacer(Modifier.height(12.dp))
                 }
-            } else {
-                items(
-                    items = watchlist,
-                    key = { it.id } // ✅ stable key
-                ) { movie ->
-                    WatchlistRow(
-                        movie = movie,
-                        onOpen = { onMovieClick(movie.id) },
-                        onDelete = { viewModel.deleteMovie(movie.id) }
-                    )
+
+                if (watchlist.isEmpty()) {
+                    item {
+                        Text(
+                            "No movies in your watchlist yet.",
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                } else {
+                    items(
+                        items = watchlist,
+                        key = { it.id }
+                    ) { movie ->
+                        WatchlistRow(
+                            movie = movie,
+                            onOpen = { onMovieClick(movie.id) },
+                            // Changed: Instead of opening detail, we set state for the dialog
+                            onWatchedClick = { movieToMarkWatched = movie },
+                            onDelete = { viewModel.deleteMovie(movie.id) }
+                        )
+                    }
                 }
+            }
+
+            // Show the rating dialog if a movie is selected
+            movieToMarkWatched?.let { movie ->
+                MarkWatchedDialog(
+                    movieTitle = movie.title, // Pass title here
+                    onDismiss = { movieToMarkWatched = null },
+                    onConfirm = { rating, watchedAt ->
+                        viewModel.markMovieAsWatchedFromWatchlist(movie, rating, watchedAt)
+                        movieToMarkWatched = null
+                    }
+                )
             }
         }
     }
@@ -72,6 +89,7 @@ fun WatchlistScreen(
 private fun WatchlistRow(
     movie: Movie,
     onOpen: () -> Unit,
+    onWatchedClick: () -> Unit, // Renamed for clarity
     onDelete: () -> Unit
 ) {
     val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
@@ -110,9 +128,8 @@ private fun WatchlistRow(
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Watched (gelb)
                     Button(
-                        onClick = onOpen, // du öffnest Detail -> dort "Watched" Dialog
+                        onClick = onWatchedClick, // Opens dialog now
                         colors = ButtonDefaults.buttonColors(
                             containerColor = accent,
                             contentColor = Color.Black
@@ -123,7 +140,6 @@ private fun WatchlistRow(
                         Text("Watched", style = MaterialTheme.typography.labelLarge)
                     }
 
-                    // Delete (rot)
                     Button(
                         onClick = onDelete,
                         colors = ButtonDefaults.buttonColors(
@@ -138,33 +154,25 @@ private fun WatchlistRow(
                 }
             }
 
-            // Right side rating (TMDB average)
-            // Right side rating (TMDB average) – vertically centered
             val avg = (movie.voteAverage ?: movie.userRating)
             if (avg != null && avg > 0f) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically),
-                    contentAlignment = Alignment.Center
-                ) {
                 Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = String.format("%.1f", avg),
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "★",
-                            color = accent,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = String.format("%.1f", avg),
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "★",
+                        color = accent,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
-
         }
     }
 }
