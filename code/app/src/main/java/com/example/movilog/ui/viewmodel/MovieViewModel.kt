@@ -262,6 +262,28 @@ class MovieViewModel(
         }
     }
 
+
+    suspend fun addMovieToExistingList(mId: Int, lId: Long) {
+        ensureMovieExistsLocally(mId)
+        repository.addMovieToCustomList(mId, lId)
+    }
+
+    suspend fun createListAndAddMovie(n: String, mId: Int): Long {
+        ensureMovieExistsLocally(mId)
+        val newListId = repository.createCustomList(n)
+        repository.addMovieToCustomList(mId, newListId)
+        return newListId
+    }
+
+    // Private helper to save the movie if it's not already there
+    private suspend fun ensureMovieExistsLocally(mId: Int) {
+        val existing = repository.getMovieById(mId)
+        if (existing == null) {
+            val details = repository.fetchMovieDetails(token, mId)
+            repository.upsert(detailsToEntity(details))
+        }
+    }
+
     private fun detailsToEntity(d: MovieDetailsDto) = Movie(
         id = d.id,
         title = d.title,
@@ -300,7 +322,5 @@ class MovieViewModel(
     fun removeMovieFromList(lId: Long, mId: Int) { viewModelScope.launch { repository.removeMovieFromList(lId, mId) } }
     fun deleteCustomList(lId: Long) { viewModelScope.launch { repository.deleteCustomList(lId) } }
     suspend fun createCustomList(name: String) = repository.createCustomList(name)
-    suspend fun addMovieToExistingList(mId: Int, lId: Long) = repository.addMovieToCustomList(mId, lId)
-    suspend fun createListAndAddMovie(n: String, mId: Int) = repository.createCustomList(n).also { repository.addMovieToCustomList(mId, it) }
     fun getMoviesForList(lId: Long) = repository.getMoviesByListId(lId)
 }
