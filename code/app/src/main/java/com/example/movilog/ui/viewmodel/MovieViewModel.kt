@@ -220,16 +220,46 @@ class MovieViewModel(
 
     fun addCurrentDetailToWatchlist() {
         val d = _detailState.value.details ?: return
-        viewModelScope.launch { repository.upsert(detailsToEntity(d).copy(inWatchlist = true)) }
+        val currentState = _detailState.value // Get current UI state
+
+        viewModelScope.launch {
+            repository.upsert(
+                detailsToEntity(d).copy(
+                    // Keep the current watched status from the UI state
+                    isWatched = currentState.isWatched,
+                    userRating = currentState.userRating,
+                    // Set watchlist to true
+                    inWatchlist = true
+                )
+            )
+        }
     }
 
     fun markCurrentDetailAsWatched(rating: Float, watchedAt: Long) {
         val d = _detailState.value.details ?: return
-        viewModelScope.launch { repository.upsert(detailsToEntity(d).copy(inWatchlist = false, isWatched = true, userRating = rating, watchedAt = watchedAt)) }
+        viewModelScope.launch {
+            repository.upsert(
+                detailsToEntity(d).copy(
+                    inWatchlist = false, // Usually removed from watchlist once watched
+                    isWatched = true,
+                    userRating = rating,
+                    watchedAt = watchedAt
+                )
+            )
+        }
     }
 
-    private fun detailsToEntity(d: MovieDetailsDto) = Movie(id = d.id, title = d.title, overview = d.overview, posterPath = d.posterPath, releaseDate = d.releaseDate, inWatchlist = false, isWatched = false, runtimeMinutes = d.runtime, voteAverage = d.voteAverage)
-
+    private fun detailsToEntity(d: MovieDetailsDto) = Movie(
+        id = d.id,
+        title = d.title,
+        overview = d.overview,
+        posterPath = d.posterPath,
+        releaseDate = d.releaseDate,
+        inWatchlist = false,
+        isWatched = false,
+        runtimeMinutes = d.runtime,
+        voteAverage = d.voteAverage
+    )
     fun deleteMovie(movieId: Int) { viewModelScope.launch { repository.delete(movieId) } }
 
     private fun buildMonthHeatmap(yearMonth: YearMonth, watchedAtMillis: List<Long>): List<Int> {

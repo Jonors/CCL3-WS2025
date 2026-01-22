@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -96,13 +97,29 @@ fun BrowseScreen(
                     Text("Movilog", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
 
-                // --- SEARCH BAR ---
                 TextField(
                     value = query,
                     onValueChange = { viewModel.onQueryChange(it) },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(RoundedCornerShape(24.dp)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(24.dp)),
                     placeholder = { Text("Search movies...", color = TextSecondary) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary) },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary)
+                    },
+                    // --- ADDED TRAILING ICON ---
+                    trailingIcon = {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.onQueryChange("") }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Clear search",
+                                    tint = TextSecondary
+                                )
+                            }
+                        }
+                    },
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = SurfaceNavy,

@@ -165,9 +165,16 @@ fun GlassBottomBar(navController: NavHostController, hazeState: HazeState) {
                         isSelected = isSelected,
                         onClick = {
                             navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                // 1. Pop up to the start destination of the graph to avoid stacking routes
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // 2. Avoid multiple copies of the same destination when re-selecting
                                 launchSingleTop = true
-                                restoreState = true
+
+                                // 3. REMOVED restoreState = true
+                                // This ensures that if you are on a detail screen and click the icon,
+                                // it resets to the main screen of that category.
                             }
                         }
                     )

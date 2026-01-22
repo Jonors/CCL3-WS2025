@@ -2,7 +2,6 @@ package com.example.movilog.ui.detail
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -13,11 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController // ✅ Added Import
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.movilog.data.model.CustomList
 import com.example.movilog.data.remote.MovieDetailsDto
 import com.example.movilog.navigation.Routes
 import com.example.movilog.ui.MovieViewModel
@@ -29,15 +28,13 @@ import kotlinx.coroutines.launch
 fun MovieDetailScreen(
     movieId: Int,
     viewModel: MovieViewModel,
-    navController: NavController, // ✅ Added NavController parameter
+    navController: NavController,
     onBack: () -> Unit = {}
 ) {
     LaunchedEffect(movieId) { viewModel.loadMovieDetails(movieId) }
 
     val state by viewModel.detailState.collectAsState()
-    // ✅ Changed name to availableLists to fix unresolved reference below
     val availableLists by viewModel.customLists.collectAsState()
-
     val scope = rememberCoroutineScope()
 
     var showWatchedDialog by remember { mutableStateOf(false) }
@@ -64,7 +61,7 @@ fun MovieDetailScreen(
         when {
             state.isLoading -> {
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = accent)
                 }
             }
             state.details == null -> {
@@ -76,69 +73,85 @@ fun MovieDetailScreen(
                 val d = state.details!!
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(bottom = 105.dp)
+                    contentPadding = PaddingValues(bottom = 32.dp)
                 ) {
                     item { HeroCard(d, cardBg, state.isWatched) }
 
+                    // --- BUTTON LAYOUT SECTION ---
                     item {
-                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .fillMaxWidth()
+                        ) {
+                            // 1. Mark as Watched Button (Primary Full Width)
+                            Button(
+                                onClick = { if (!state.isWatched) showWatchedDialog = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !state.isWatched,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = accent,
+                                    disabledContainerColor = Color.Gray.copy(alpha = 0.3f)
+                                )
+                            ) {
+                                Text(
+                                    text = if (state.isWatched) "Watched" else "Mark as Watched",
+                                    color = if (state.isWatched) Color.White.copy(alpha = 0.5f) else Color.Black
+                                )
+                            }
+
+                            Spacer(Modifier.height(12.dp))
+
+                            // 2. Secondary Buttons Row (Watchlist & Add to List)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                when {
-                                    state.isWatched -> {
-                                        Button(
-                                            onClick = { showAddToListDialog = true },
-                                            modifier = Modifier.weight(1f),
-                                            colors = ButtonDefaults.buttonColors(containerColor = accent)
-                                        ) {
-                                            Icon(Icons.Default.Add, contentDescription = null, tint = Color.Black)
-                                            Spacer(Modifier.width(8.dp))
-                                            Text("Add to List", color = Color.Black)
-                                        }
-                                    }
-                                    state.inWatchlist -> {
-                                        OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.weight(1f)) {
-                                            Text("In Watchlist", color = Color.White)
-                                        }
-                                        Button(
-                                            onClick = { showWatchedDialog = true },
-                                            modifier = Modifier.weight(1f),
-                                            colors = ButtonDefaults.buttonColors(containerColor = accent)
-                                        ) {
-                                            Text("Watched", color = Color.Black)
-                                        }
-                                    }
-                                    else -> {
-                                        OutlinedButton(
-                                            onClick = { viewModel.addCurrentDetailToWatchlist() },
-                                            modifier = Modifier.weight(1f)
-                                        ) {
-                                            Text("Add to Watchlist", color = Color.White)
-                                        }
-                                        Button(
-                                            onClick = { showWatchedDialog = true },
-                                            modifier = Modifier.weight(1f),
-                                            colors = ButtonDefaults.buttonColors(containerColor = accent)
-                                        ) {
-                                            Text("Watched", color = Color.Black)
-                                        }
-                                    }
+                                // Add to Watchlist
+                                OutlinedButton(
+                                    onClick = { viewModel.addCurrentDetailToWatchlist() },
+                                    modifier = Modifier.weight(1f),
+                                    enabled = !state.inWatchlist && !state.isWatched,
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                                        brush = SolidColor(if (state.inWatchlist || state.isWatched) Color.Gray else Color.White)
+                                    )
+                                ) {
+                                    Text(
+                                        text = if (state.inWatchlist) "In Watchlist" else "Add to Watchlist",
+                                        color = if (state.inWatchlist || state.isWatched) Color.Gray else Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+
+                                // Add to List
+                                Button(
+                                    onClick = { showAddToListDialog = true },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.withAlpha(0.1f)
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Add to List", color = Color.White, maxLines = 1)
                                 }
                             }
                         }
-                        Spacer(Modifier.height(14.dp))
+                        Spacer(Modifier.height(24.dp))
                     }
 
                     item {
                         Text(
                             text = d.overview.ifBlank { "No description available." },
                             color = Color.White,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.bodyMedium
                         )
-                        Spacer(Modifier.height(18.dp))
+                        Spacer(Modifier.height(24.dp))
                     }
 
                     item {
@@ -152,7 +165,7 @@ fun MovieDetailScreen(
             }
         }
 
-        // Dialogs
+        // Dialog Logic
         if (showWatchedDialog) {
             MarkWatchedDialog(
                 onDismiss = { showWatchedDialog = false },
@@ -169,18 +182,14 @@ fun MovieDetailScreen(
                 onDismiss = { showAddToListDialog = false },
                 onListSelected = { listId ->
                     scope.launch {
-                        // Wait for the movie to be added
                         viewModel.addMovieToExistingList(movieId, listId)
-                        // Navigate once finished
                         navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$listId")
                         showAddToListDialog = false
                     }
                 },
                 onCreateNewList = { name ->
                     scope.launch {
-                        // Wait for list creation AND movie addition
                         val newListId = viewModel.createListAndAddMovie(name, movieId)
-                        // Navigate to the specific new list
                         navController.navigate("${Routes.CUSTOM_LIST_DETAIL}/$newListId")
                         showAddToListDialog = false
                     }
@@ -189,10 +198,6 @@ fun MovieDetailScreen(
         }
     }
 }
-
-
-// ... rest of HeroCard, InfoChip, and formatRuntime functions remain the same
-
 
 @Composable
 private fun HeroCard(
@@ -220,22 +225,25 @@ private fun HeroCard(
                 AsyncImage(
                     model = backdropUrl,
                     contentDescription = "Backdrop",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
 
                 if (posterUrl != null) {
                     Card(
                         modifier = Modifier
                             .padding(14.dp)
-                            .width(120.dp)
-                            .height(170.dp)
+                            .width(100.dp)
+                            .height(150.dp)
                             .align(Alignment.BottomStart),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(8.dp)
                     ) {
                         AsyncImage(
                             model = posterUrl,
                             contentDescription = "Poster",
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
                         )
                     }
                 }
@@ -250,15 +258,14 @@ private fun HeroCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(Modifier.height(6.dp))
-
-
                 Spacer(Modifier.height(12.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     InfoChip(label = formatRuntime(details.runtime))
-                    InfoChip(label = details.releaseDate ?: "Unknown date")
-                    InfoChip(label = if (isWatched) "Watched" else "Not Watched")
+                    InfoChip(label = details.releaseDate?.take(4) ?: "N/A")
+                    if (isWatched) {
+                        InfoChip(label = "Watched", containerColor = Color(0xFF4CAF50).copy(alpha = 0.2f))
+                    }
                 }
             }
         }
@@ -266,24 +273,29 @@ private fun HeroCard(
 }
 
 @Composable
-private fun InfoChip(label: String) {
+private fun InfoChip(
+    label: String,
+    containerColor: Color = Color.Black.copy(alpha = 0.25f)
+) {
     Surface(
-        color = Color.Black.copy(alpha = 0.25f),
-        shape = RoundedCornerShape(999.dp)
+        color = containerColor,
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(
             text = label,
             color = Color.White,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.bodySmall
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
-
 
 private fun formatRuntime(runtimeMinutes: Int?): String {
     if (runtimeMinutes == null || runtimeMinutes <= 0) return "—"
     val h = runtimeMinutes / 60
     val m = runtimeMinutes % 60
-    return "${h} hr ${m} min"
+    return if (h > 0) "${h}h ${m}m" else "${m}m"
 }
+
+// Extension to help with color alphas in older compose versions if needed
+fun Color.withAlpha(alpha: Float): Color = this.copy(alpha = alpha)
