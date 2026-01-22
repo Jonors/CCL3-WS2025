@@ -15,8 +15,6 @@ body {
     line-height: 1.6;
 }
 
-
-
 header {
     display: flex;
     flex-direction: column;
@@ -24,6 +22,13 @@ header {
     padding: 60px 20px;
     background: linear-gradient(to bottom, #101c26, #050a0f);
     border-bottom: 1px solid var(--border-color);
+}
+
+.header-links {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 }
 
 .nav-bar {
@@ -45,6 +50,11 @@ header {
 .nav-bar a.active {
     background-color: var(--accent);
     color: #000;
+}
+
+.nav-bar a:hover:not(.active) {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: var(--text-primary);
 }
 
 
@@ -73,6 +83,27 @@ header h1 {
     margin: 0;
     color: var(--text-secondary);
     font-size: 1.1rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn:hover {
+    background-color: #24292e; /* Classic GitHub dark gray */
+    border-color: var(--text-secondary);
+    transform: translateY(-2px);
 }
 
 .legend{
@@ -141,10 +172,10 @@ header h1 {
 }
 
 .flow-step2 {
-    flex: 0 1 calc(25% - 20px);
-    min-width: 1000px;
-    max-width: 250px;
-    position: relative;
+   flex: 0 1 100% !important; /* Forces the user flow image to span full width */
+   min-width: 1000px;
+   max-width: 1000px !important;
+   position: relative;
 }
 
 .step-number {
@@ -205,10 +236,10 @@ th, td {
 
 .step-content2 {
     background: var(--card-bg);
-    padding: 35px 15px 20px 15px;
+    padding: 20px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    height: 300px;
+     height: auto !important;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -339,4 +370,18 @@ footer {
         height: 10vh;
     }
 }
+
+@media (max-width: 480px) {
+    .header-links {
+        flex-direction: column;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .btn {
+        justify-content: center;
+    }
+}
+
+
 

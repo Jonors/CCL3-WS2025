@@ -135,9 +135,9 @@ private fun WatchlistRow(
                             contentColor = Color.Black
                         ),
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 1.dp)
                     ) {
-                        Text("Watched", style = MaterialTheme.typography.labelLarge)
+                        Text("Mark as watched", style = MaterialTheme.typography.labelLarge)
                     }
 
                     Button(
@@ -147,7 +147,7 @@ private fun WatchlistRow(
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 1.dp)
                     ) {
                         Text("Delete", style = MaterialTheme.typography.labelLarge)
                     }
