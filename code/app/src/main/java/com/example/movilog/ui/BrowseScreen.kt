@@ -1,10 +1,5 @@
 package com.example.movilog.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -16,14 +11,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -55,6 +51,8 @@ fun BrowseScreen(
     val isOffline by viewModel.isOffline.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val uriHandler = LocalUriHandler.current
+
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
             snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
@@ -71,7 +69,6 @@ fun BrowseScreen(
             onRefresh = { viewModel.refreshAll() },
             modifier = Modifier.padding(padding)
         ) {
-            // CRITICAL: The inner column needs the fillMaxSize to receive scroll events properly
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -91,12 +88,16 @@ fun BrowseScreen(
                 }
 
                 // --- HEADER ---
-                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Image(painter = painterResource(R.drawable.logo), contentDescription = null, modifier = Modifier.size(40.dp))
                     Spacer(Modifier.width(8.dp))
                     Text("Movilog", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
 
+                // --- SEARCH BAR ---
                 TextField(
                     value = query,
                     onValueChange = { viewModel.onQueryChange(it) },
@@ -105,18 +106,11 @@ fun BrowseScreen(
                         .padding(horizontal = 16.dp)
                         .clip(RoundedCornerShape(24.dp)),
                     placeholder = { Text("Search movies...", color = TextSecondary) },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary)
-                    },
-                    // --- ADDED TRAILING ICON ---
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary) },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { viewModel.onQueryChange("") }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Clear search",
-                                    tint = TextSecondary
-                                )
+                                Icon(imageVector = Icons.Default.Close, contentDescription = "Clear", tint = TextSecondary)
                             }
                         }
                     },
@@ -143,14 +137,55 @@ fun BrowseScreen(
                     MovieSection("Top Rated", topRated, onMovieClick, onSeeAllTopRated)
                 }
 
-                // Add enough bottom padding so the last item isn't covered by bottom nav
-                Spacer(Modifier.height(90.dp))
+                // --- TMDB FOOTER ---
+                TMDBFooter(onLinkClick = { uriHandler.openUri("https://www.themoviedb.org") })
+
+                Spacer(Modifier.height(100.dp))
             }
         }
     }
 }
 
-// --- HELPER COMPOSABLES (OUTSIDE Main Function) ---
+@Composable
+fun TMDBFooter(onLinkClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp, horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Change R.drawable.tmdb_logo to your actual file name
+        Image(
+            painter = painterResource(id = R.drawable.tmdb_logo),
+            contentDescription = "TMDB Logo",
+            modifier = Modifier.height(20.dp),
+            alpha = 0.7f
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "This application uses the TMDB API but is not endorsed or certified by TMDB.",
+            color = Color.White.copy(alpha = 0.5f),
+            fontSize = 11.sp,
+            textAlign = TextAlign.Center,
+            lineHeight = 16.sp
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+            text = "www.themoviedb.org",
+            color = Color(0xFF01B4E4),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier.clickable { onLinkClick() }
+        )
+    }
+}
+
+// --- REMAINING HELPER COMPOSABLES ---
 
 @Composable
 fun MovieSection(title: String, movies: List<Movie>, onMovieClick: (Movie) -> Unit, onSeeAll: (() -> Unit)? = null) {
