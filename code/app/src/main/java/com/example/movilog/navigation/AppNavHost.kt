@@ -46,10 +46,10 @@ fun AppNavHost(viewModel: MovieViewModel) {
 
     Scaffold(
         containerColor = bg,
-        bottomBar = {} // Leave empty to remove the "docked" bar border
+        bottomBar = {}
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Content Layer with Blur Source
+            // 1. Content Layer
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -61,7 +61,6 @@ fun AppNavHost(viewModel: MovieViewModel) {
                 NavHost(
                     navController = navController,
                     startDestination = Routes.BROWSE,
-
                     modifier = Modifier.fillMaxSize()
                 ) {
                     composable(Routes.BROWSE) {
@@ -108,11 +107,11 @@ fun AppNavHost(viewModel: MovieViewModel) {
                 }
             }
 
-            // 2. Floating Navbar Layer
+            // 2. Optimized Floating Navbar Layer
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.navigationBars) // Moves bar above system nav
+                    .navigationBarsPadding() // Better handling for gesture navigation
             ) {
                 GlassBottomBar(navController = navController, hazeState = hazeState)
             }
@@ -124,30 +123,43 @@ fun AppNavHost(viewModel: MovieViewModel) {
 fun GlassBottomBar(navController: NavHostController, hazeState: HazeState) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val bg = Color(0xFF0B2A36)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp) // Creates the "floating" gap
-            .height(64.dp)
+            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .height(68.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(100)) // Capsule shape
+                .clip(RoundedCornerShape(100))
                 .hazeChild(
                     state = hazeState,
                     shape = RoundedCornerShape(100),
                     style = HazeStyle(
-                        tint = Color.White.copy(alpha = 0.05f),
-                        blurRadius = 20.dp,
-                        noiseFactor = HazeDefaults.noiseFactor,
+                        tint = bg.copy(alpha = 0.25f), // Darker tint for visibility
+                        blurRadius = 25.dp,
+                        noiseFactor = 0.15f, // Added texture
+                    )
+                )
+                // The "Liquid Sheen" layer
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.12f),
+                            Color.Transparent
+                        )
                     )
                 )
                 .border(
-                    width = 1.dp,
+                    width = 1.5.dp, // Slightly thicker for "Glass Edge" look
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.2f), Color.White.copy(alpha = 0.05f))
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.35f),
+                            Color.White.copy(alpha = 0.1f)
+                        )
                     ),
                     shape = RoundedCornerShape(100)
                 ),
@@ -165,16 +177,10 @@ fun GlassBottomBar(navController: NavHostController, hazeState: HazeState) {
                         isSelected = isSelected,
                         onClick = {
                             navController.navigate(item.route) {
-                                // 1. Pop up to the start destination of the graph to avoid stacking routes
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
-                                // 2. Avoid multiple copies of the same destination when re-selecting
                                 launchSingleTop = true
-
-                                // 3. REMOVED restoreState = true
-                                // This ensures that if you are on a detail screen and click the icon,
-                                // it resets to the main screen of that category.
                             }
                         }
                     )

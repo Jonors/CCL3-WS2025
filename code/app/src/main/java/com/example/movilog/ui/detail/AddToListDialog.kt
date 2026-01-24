@@ -47,15 +47,13 @@ fun AddToListDialog(
 ) {
     var newListName by remember { mutableStateOf("") }
 
-
     val bg = Color(0xFF0B2A36)
-    val cardBg = Color(0xFF6F7D86).copy(alpha = 0.55f)
     val accent = Color(0xFFF2B400)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = bg, // Matches page background
-        shape = RoundedCornerShape(24.dp), // Matches HeroCard shape
+        containerColor = bg,
+        shape = RoundedCornerShape(24.dp),
         title = {
             Text(
                 "Add to Custom List",
@@ -65,58 +63,19 @@ fun AddToListDialog(
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // List existing lists
-                if (availableLists.isEmpty()) {
+                // --- SECTION 1: SELECT EXISTING ---
+                if (availableLists.isNotEmpty()) {
                     Text(
-                        "No lists created yet.",
+                        "Select an exisitng list:",
                         color = Color.White.copy(alpha = 0.6f),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        color = Color.White.copy(alpha = 0.1f)
-                    )
-
-                    // Create New List field
-                    OutlinedTextField(
-                        value = newListName,
-                        onValueChange = { newListName = it },
-                        label = { Text("New List Name") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedLabelColor = accent,
-                            unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
-                            focusedBorderColor = accent,
-                            unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                            cursorColor = accent
-                        )
-                    )
-
-                    Button(
-                        onClick = {
-                            if (newListName.isNotBlank()) {
-                                onCreateNewList(newListName)
-                                newListName = ""
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = accent),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Create & Add", color = Color.Black)
-                    }
-                } else {
                     LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
                         items(availableLists) { list ->
                             TextButton(
                                 onClick = { onListSelected(list.listId) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp),
+                                modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.textButtonColors(contentColor = accent)
                             ) {
                                 Row(
@@ -130,6 +89,12 @@ fun AddToListDialog(
                             }
                         }
                     }
+                } else {
+                    Text(
+                        "No lists created yet.",
+                        color = Color.White.copy(alpha = 0.6f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
 
                 HorizontalDivider(
@@ -137,14 +102,53 @@ fun AddToListDialog(
                     color = Color.White.copy(alpha = 0.1f)
                 )
 
+                // --- SECTION 2: CREATE NEW (Always Visible) ---
+                Text(
+                    "Create a new list:",
+                    color = Color.White.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = newListName,
+                    onValueChange = { newListName = it },
+                    label = { Text("New List Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedLabelColor = accent,
+                        unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
+                        focusedBorderColor = accent,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        cursorColor = accent
+                    )
+                )
 
                 Spacer(Modifier.height(12.dp))
 
+                Button(
+                    onClick = {
+                        if (newListName.isNotBlank()) {
+                            onCreateNewList(newListName)
+                            newListName = ""
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = accent),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = newListName.isNotBlank()
+                ) {
+                    Text("Create & Add", color = accent)
+                }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = Color.White.copy(alpha = 0.7f))
+                Text("Cancel", color = Color.White.copy(alpha = 0.7f))
             }
         }
     )
