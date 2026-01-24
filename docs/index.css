@@ -57,7 +57,6 @@ header {
     color: var(--text-primary);
 }
 
-
 .header {
     display: flex;
     flex-direction: row;
@@ -106,18 +105,18 @@ header h1 {
     transform: translateY(-2px);
 }
 
-.legend{
+.legend {
     color: var(--text-secondary);
     font-size: 0.9rem;
     border-top: 1px solid var(--border-color);
 }
+
 
 .container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 40px 20px;
 }
-
 
 .intro-card {
     background: var(--card-bg);
@@ -136,11 +135,10 @@ header h1 {
     padding-top: 20px;
 }
 
-    h3 {
+h3 {
     color: var(--accent);
     font-size: 1rem;
 }
-
 
 
 .flow-title {
@@ -158,12 +156,7 @@ header h1 {
     margin-top: 60px;
 }
 
-.flow-step {
-    flex: 0 1 calc(25% - 20px);
-    min-width: 220px;
-    max-width: 250px;
-    position: relative;
-}
+.flow-step,
 .flow-step1 {
     flex: 0 1 calc(25% - 20px);
     min-width: 220px;
@@ -172,10 +165,10 @@ header h1 {
 }
 
 .flow-step2 {
-   flex: 0 1 100% !important; /* Forces the user flow image to span full width */
-   min-width: 1000px;
-   max-width: 1000px !important;
-   position: relative;
+    flex: 0 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    position: relative;
 }
 
 .step-number {
@@ -197,25 +190,13 @@ header h1 {
     justify-content: center;
 }
 
-/* Targeting the table in the Tech Stack section */
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px; /* This adds vertical space between rows */
-}
-
-th, td {
-    padding: 5px 10px; /* This adds space inside each cell */
-    text-align: left;
-}
-
-
 .step-content {
     background: var(--card-bg);
     padding: 35px 15px 20px 15px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    height: auto; min-height: 400px;
+    height: auto;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -246,15 +227,8 @@ th, td {
     text-align: center;
 }
 
-.step-content img {
-    width: 100%;
-    max-width: 160px;
-    height: auto;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
 
+.step-content img,
 .step-content1 img {
     width: 100%;
     max-width: 160px;
@@ -265,7 +239,7 @@ th, td {
 }
 
 .step-content2 img {
-    width: 90%;
+    width: 100%;
     max-width: 1000px;
     height: auto;
     border-radius: 8px;
@@ -273,63 +247,51 @@ th, td {
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.step-content h3 {
-    font-size: 1.1rem;
-    margin: 0 0 0 0;
-    color: var(--accent);
-}
-
-.step-content1 h3 {
-    font-size: 1.1rem;
-    margin: 0 0 0 0;
-    color: var(--accent);
-}
-
+.step-content h3,
+.step-content1 h3,
 .step-content2 h3 {
     font-size: 1.1rem;
-    margin: 0 0 0 0;
+    margin: 0;
     color: var(--accent);
 }
 
-.step-content p {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    color: var(--text-secondary);
-}
-
-.step-content1 p {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    color: var(--text-secondary);
-}
-
+.step-content p,
+.step-content1 p,
 .step-content2 p {
     font-size: 0.9rem;
     line-height: 1.4;
     color: var(--text-secondary);
 }
 
-
-.step-content:hover {
-    border-color: var(--accent);
-    transform: translateY(-5px);
-    transition: all 0.3s ease;
-}
-
-.step-content1:hover {
-    border-color: var(--accent);
-    transform: translateY(-5px);
-    transition: all 0.3s ease;
-}
-
+.step-content:hover,
+.step-content1:hover,
 .step-content2:hover {
     border-color: var(--accent);
     transform: translateY(-5px);
     transition: all 0.3s ease;
 }
 
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+th, td {
+    padding: 5px 10px;
+    text-align: left;
+}
+
 .charts {
     width: 40rem;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 12px auto;
+}
+
+img {
+    max-width: 100%;
 }
 
 
@@ -341,33 +303,56 @@ footer {
     border-top: 1px solid var(--border-color);
 }
 
+
+
 @media (max-width: 1024px) {
-    .flow-step {
+    .flow-step,
+    .flow-step1 {
         flex: 0 1 calc(50% - 20px);
     }
 }
 
 @media (max-width: 600px) {
-    .flow-step {
+    .flow-step,
+    .flow-step1 {
         flex: 0 1 100%;
     }
-}
 
-@media (max-width: 600px) {
     .grid-info {
         grid-template-columns: 1fr;
     }
 
-    .step-content img {
+    .step-content img,
+    .step-content1 img {
         max-width: 100%;
     }
 
-    .header h1 {
+    header h1 {
         font-size: 2rem;
     }
 
     .header img {
         height: 10vh;
+    }
+
+
+    .header-links {
+        flex-direction: column;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .btn {
+        justify-content: center;
+        width: 100%;
+    }
+
+
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
     }
 }
 
@@ -380,8 +365,6 @@ footer {
 
     .btn {
         justify-content: center;
+        width: 100%;
     }
 }
-
-
-
