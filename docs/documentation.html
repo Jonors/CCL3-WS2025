@@ -34,7 +34,6 @@
 </header>
 
 <main class="container">
-
     <section class="intro-card">
         <h2>Project Documentation</h2>
         <p>
@@ -44,6 +43,7 @@
             MoviLog allows users to manage a personal watchlist, record watched movies with custom ratings,
             and build curated collections.
         </p>
+    </section>
 
     <section class="content-section">
         <h3>Core Features</h3>
@@ -113,23 +113,20 @@
             MoviLog follows the MVVM pattern to ensure the UI remains reactive and the business logic is decoupled from the Android framework.
         </p>
 
-
-
         <h3>Data Layer</h3>
         <ul>
-            <li>Remote:  TmdbApiService handles REST API calls to TMDB.</li>
-            <li>Local:  AppDatabase uses Room to store Movie entities and CustomList relationships.</li>
-            <li>Repository:  MovieRepository acts as the single source of truth mediating between network data and local persistence.</li>
+            <li>Remote: TmdbApiService handles REST API calls to TMDB.</li>
+            <li>Local: AppDatabase uses Room to store Movie entities and CustomList relationships.</li>
+            <li>Repository: MovieRepository acts as the single source of truth mediating between network data and local persistence.</li>
         </ul>
 
         <h3>ERD Diagramm</h3>
         <img class="charts" src="images/ERDDiagramm.png" alt="ERD Diagramm">
 
-
         <h3>UI Layer</h3>
         <ul>
-            <li>Navigation:  AppNavHost.kt manages the screen transitions and argument passing.</li>
-            <li>State Management:  MovieViewModel exposes StateFlow objects that the Compose UI observes to reflect data changes immediately.</li>
+            <li>Navigation: AppNavHost.kt manages the screen transitions and argument passing.</li>
+            <li>State Management: MovieViewModel exposes StateFlow objects that the Compose UI observes to reflect data changes immediately.</li>
         </ul>
     </section>
 
@@ -141,8 +138,6 @@
             <li>Typography: Cinematic styling using the Oswald font family.</li>
         </ul>
     </section>
-    </section>
-
 </main>
 
 <footer>
